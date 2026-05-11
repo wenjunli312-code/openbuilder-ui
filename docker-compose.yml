@@ -12,6 +12,8 @@ services:
       - ./frontend:/frontend
       # Mount workspace for manifest and projects access
       - ~/workspace/openbuilder-workspace:/workspace/openbuilder-workspace
+      # Mount openbuilder code for build commands
+      - ~/workspace/code/openbuilder:/root/workspace/code/openbuilder
     environment:
       - FLASK_ENV=development
     restart: unless-stopped

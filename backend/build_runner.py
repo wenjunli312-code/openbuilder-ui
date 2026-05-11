@@ -15,7 +15,7 @@ from pathlib import Path
 from build_store import update_build
 
 # ── OpenBuilder paths ──────────────────────────────────────────────────────────
-OPENBUILDER_SRC = Path.home() / "workspace" / "code" / "openbuilder" / "src"
+OPENBUILDER_SRC = Path("/root/workspace/code/openbuilder/src")
 WORKSPACE_DIR = Path.home() / "workspace" / "openbuilder-workspace"
 
 # Add openbuilder to path
@@ -135,7 +135,7 @@ def run_build(build_id: str, project: str, mode: str, platform: str, manifest: s
 
         try:
             import subprocess
-            OB_PY = str(Path.home() / "workspace" / "code" / "openbuilder" / ".venv" / "bin" / "python")
+            OB_PY = "/usr/local/bin/python3"
 
             # Ensure workspace is initialized (only if no manifest provided yet)
             WORKSPACE_DIR.mkdir(parents=True, exist_ok=True)
@@ -150,12 +150,14 @@ def run_build(build_id: str, project: str, mode: str, platform: str, manifest: s
 
             # Step 2: Run openbuilder build
             update_build(build_id, log=f"Running openbuilder build...\n")
+            env = os.environ.copy()
+            env["PYTHONPATH"] = "/root/workspace/code/openbuilder/src"
             result = subprocess.run(
-                [OB_PY, "-m", "openbuilder", "build", "--build-type", mode],
+                [OB_PY, "-c", "from openbuilder.cli import main; main()", "build", "--build-type", mode],
                 cwd=str(WORKSPACE_DIR),
                 capture_output=True,
                 text=True,
-                env={},
+                env=env,
             )
             log = (result.stdout or "") + "\n"
             if result.returncode != 0:
