@@ -14,6 +14,8 @@ services:
       - ~/workspace/openbuilder-workspace:/workspace/openbuilder-workspace
       # Mount openbuilder code for build commands
       - ~/workspace/code/openbuilder:/root/workspace/code/openbuilder
+      # Persist builds.json between restarts
+      - ./backend/builds.json:/app/builds.json
     environment:
       - FLASK_ENV=development
       - TZ=Asia/Shanghai

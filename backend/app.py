@@ -73,15 +73,26 @@ def compare_builds():
     if not right:
         return jsonify({"error": f"Build '{right_id}' not found"}), 404
 
-    # Build repo lists from manifest if available
-    def get_repos(build):
-        repos = build.get("repos", [])
-        if isinstance(repos, list) and repos:
-            return {r["name"]: r for r in repos if isinstance(r, dict) and "name" in r}
-        return {}
+    def get_project_repos(project_name):
+        """Read repos from the project's manifest.yaml."""
+        manifest_path = WORKSPACE_DIR / ".openbuilder" / "projects" / project_name / "manifest.yaml"
+        if not manifest_path.exists():
+            return []
+        try:
+            import yaml
+            with open(manifest_path) as f:
+                data = yaml.safe_load(f)
+            repos = data.get("repos", [])
+            return [{ "name": r["name"], "url": r.get("url", ""), "revision": r.get("revision", "") } for r in repos]
+        except Exception:
+            return []
 
-    left_repos = get_repos(left)
-    right_repos = get_repos(right)
+    left_repos_raw = get_project_repos(left.get("project", ""))
+    right_repos_raw = get_project_repos(right.get("project", ""))
+
+    left_repos = {r["name"]: r for r in left_repos_raw}
+    right_repos = {r["name"]: r for r in right_repos_raw}
+
     all_repo_names = sorted(set(left_repos.keys()) | set(right_repos.keys()))
 
     repo_comparisons = []
