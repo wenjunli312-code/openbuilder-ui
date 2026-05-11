@@ -189,6 +189,13 @@ def run_build(build_id: str, project: str, mode: str, platform: str, manifest: s
                 else:
                     update_build(build_id, log=f"Cloned {rname}\n")
 
+            # Step 2.5: Clean build directory to avoid stale CMake cache
+            build_dir = WORKSPACE_DIR / "build"
+            if build_dir.exists():
+                import shutil
+                shutil.rmtree(build_dir)
+                update_build(build_id, log="Cleaned build directory\n")
+
             # Step 3: Run openbuilder build
             update_build(build_id, log=f"Running openbuilder build...\n")
             result = subprocess.run(
