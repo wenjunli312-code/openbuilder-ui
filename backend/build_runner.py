@@ -142,16 +142,43 @@ def run_build(build_id: str, project: str, mode: str, platform: str, manifest: s
             ob_dir = WORKSPACE_DIR / ".openbuilder"
             ob_dir.mkdir(parents=True, exist_ok=True)
 
-            # Step 1: Write manifest.yaml
+            # Step 1: Write manifest.yaml (convert repos -> projects for openbuilder)
             update_build(build_id, log="Writing manifest.yaml...\n")
+            import yaml
+            manifest_data = yaml.safe_load(manifest)
+            if "repos" in manifest_data and "projects" not in manifest_data:
+                manifest_data["projects"] = manifest_data.pop("repos")
+            # Ensure workspace section exists
+            if "workspace" not in manifest_data:
+                manifest_data["workspace"] = {"name": project, "current_project": project}
             manifest_file = ob_dir / "manifest.yaml"
-            manifest_file.write_text(manifest)
+            with open(manifest_file, "w") as f:
+                yaml.dump(manifest_data, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
             update_build(build_id, log=f"manifest.yaml written ({len(manifest)} bytes)\n")
 
-            # Step 2: Run openbuilder build
-            update_build(build_id, log=f"Running openbuilder build...\n")
+            # Prepare env
             env = os.environ.copy()
             env["PYTHONPATH"] = "/root/workspace/code/openbuilder/src"
+
+            # Step 2: Clone repos
+            update_build(build_id, log="Cloning repos...\n")
+            # manifest_data already loaded above (repos converted to projects)
+            repo_names = [r["name"] for r in manifest_data.get("projects", [])]
+            for rname in repo_names:
+                result = subprocess.run(
+                    [OB_PY, "-c", "from openbuilder.cli import main; main()", "clone", rname],
+                    cwd=str(WORKSPACE_DIR),
+                    capture_output=True,
+                    text=True,
+                    env=env,
+                )
+                if result.returncode != 0:
+                    update_build(build_id, log=f"Warning: clone {rname} failed: {result.stderr}\n")
+                else:
+                    update_build(build_id, log=f"Cloned {rname}\n")
+
+            # Step 3: Run openbuilder build
+            update_build(build_id, log=f"Running openbuilder build...\n")
             result = subprocess.run(
                 [OB_PY, "-c", "from openbuilder.cli import main; main()", "build", "--build-type", mode],
                 cwd=str(WORKSPACE_DIR),
@@ -164,7 +191,23 @@ def run_build(build_id: str, project: str, mode: str, platform: str, manifest: s
                 raise RuntimeError(f"Build failed: {result.stderr or result.stdout}")
             update_build(build_id, log=log)
 
-            # Step 3: Publish to S3
+            # Step 4: Capture commit hashes
+            update_build(build_id, log="Capturing commit hashes...\n")
+            repos_info = []
+            for rname in repo_names:
+                src_dir = WORKSPACE_DIR / "src" / rname
+                commit = ""
+                if src_dir.exists():
+                    res = subprocess.run(
+                        ["git", "-C", str(src_dir), "rev-parse", "HEAD"],
+                        capture_output=True, text=True
+                    )
+                    if res.returncode == 0:
+                        commit = res.stdout.strip()
+                repos_info.append({"name": rname, "commit": commit})
+                update_build(build_id, log=f"  {rname}: {commit[:8] or '(empty)'}\n")
+
+            # Step 5: Publish to S3
             update_build(build_id, log=log + "Allocating build ID...\n")
             build_num = _s3_allocate_build_id()
             update_build(build_id, log=log + f"Build ID: {build_num}, packaging...\n")
@@ -177,6 +220,7 @@ def run_build(build_id: str, project: str, mode: str, platform: str, manifest: s
                 status="success",
                 log=log + f"Published as build {build_num}.\n",
                 artifact_path=artifact_path,
+                repos=repos_info,
             )
 
         except Exception as e:

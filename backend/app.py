@@ -87,8 +87,9 @@ def compare_builds():
         except Exception:
             return []
 
-    left_repos_raw = get_project_repos(left.get("project", ""))
-    right_repos_raw = get_project_repos(right.get("project", ""))
+    # Prefer repos stored in build record (has commit hashes), fallback to manifest
+    left_repos_raw = left.get("repos", []) or get_project_repos(left.get("project", ""))
+    right_repos_raw = right.get("repos", []) or get_project_repos(right.get("project", ""))
 
     left_repos = {r["name"]: r for r in left_repos_raw}
     right_repos = {r["name"]: r for r in right_repos_raw}

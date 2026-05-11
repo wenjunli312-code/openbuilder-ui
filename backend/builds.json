@@ -1,6 +1,126 @@
 {
   "builds": [
     {
+      "id": "20260511_test2",
+      "project": "perception_demo",
+      "mode": "debug",
+      "platform": "linux-x86_64",
+      "status": "success",
+      "created_at": "2026-05-11T16:10:00",
+      "finished_at": "2026-05-11T16:15:00",
+      "repos": [
+        {
+          "name": "common-utils",
+          "commit": "abc1234"
+        },
+        {
+          "name": "sensor-abstraction",
+          "commit": "28b380d"
+        }
+      ]
+    },
+    {
+      "id": "20260511_test1",
+      "project": "perception_demo",
+      "mode": "release",
+      "platform": "linux-x86_64",
+      "status": "success",
+      "created_at": "2026-05-11T16:00:00",
+      "finished_at": "2026-05-11T16:05:00",
+      "repos": [
+        {
+          "name": "common-utils",
+          "commit": "abc1234"
+        },
+        {
+          "name": "sensor-abstraction",
+          "commit": "def5678"
+        }
+      ]
+    },
+    {
+      "id": "20260511_161727",
+      "project": "perception_demo",
+      "mode": "release",
+      "platform": "linux-x86_64",
+      "status": "failed",
+      "created_at": "2026-05-11T16:17:27.328646",
+      "finished_at": "2026-05-11T16:17:30.681101",
+      "artifact_path": null,
+      "log": "Build failed: Build failed: Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"/usr/local/lib/python3.11/site-packages/click/core.py\", line 1157, in __call__\n    return self.main(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/click/core.py\", line 1078, in main\n    rv = self.invoke(ctx)\n         ^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/click/core.py\", line 1688, in invoke\n    return _process_result(sub_ctx.command.invoke(sub_ctx))\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/click/core.py\", line 1434, in invoke\n    return ctx.invoke(self.callback, **ctx.params)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/click/core.py\", line 783, in invoke\n    return __callback(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/root/workspace/code/openbuilder/src/openbuilder/commands/build.py\", line 280, in build\n    _run(cmake_configure)\n  File \"/root/workspace/code/openbuilder/src/openbuilder/commands/build.py\", line 81, in _run\n    result = subprocess.run(cmd, cwd=cwd)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/subprocess.py\", line 548, in run\n    with Popen(*popenargs, **kwargs) as process:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/subprocess.py\", line 1026, in __init__\n    self._execute_child(args, executable, preexec_fn, close_fds,\n  File \"/usr/local/lib/python3.11/subprocess.py\", line 1955, in _execute_child\n    raise child_exception_type(errno_num, err_msg, err_filename)\nFileNotFoundError: [Errno 2] No such file or directory: 'cmake'\n\n",
+      "error": "Build failed: Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"/usr/local/lib/python3.11/site-packages/click/core.py\", line 1157, in __call__\n    return self.main(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/click/core.py\", line 1078, in main\n    rv = self.invoke(ctx)\n         ^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/click/core.py\", line 1688, in invoke\n    return _process_result(sub_ctx.command.invoke(sub_ctx))\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/click/core.py\", line 1434, in invoke\n    return ctx.invoke(self.callback, **ctx.params)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/click/core.py\", line 783, in invoke\n    return __callback(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/root/workspace/code/openbuilder/src/openbuilder/commands/build.py\", line 280, in build\n    _run(cmake_configure)\n  File \"/root/workspace/code/openbuilder/src/openbuilder/commands/build.py\", line 81, in _run\n    result = subprocess.run(cmd, cwd=cwd)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/subprocess.py\", line 548, in run\n    with Popen(*popenargs, **kwargs) as process:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/subprocess.py\", line 1026, in __init__\n    self._execute_child(args, executable, preexec_fn, close_fds,\n  File \"/usr/local/lib/python3.11/subprocess.py\", line 1955, in _execute_child\n    raise child_exception_type(errno_num, err_msg, err_filename)\nFileNotFoundError: [Errno 2] No such file or directory: 'cmake'\n"
+    },
+    {
+      "id": "20260511_161226",
+      "project": "perception_demo",
+      "mode": "release",
+      "platform": "linux-x86_64",
+      "status": "failed",
+      "created_at": "2026-05-11T16:12:26.370248",
+      "finished_at": "2026-05-11T16:12:26.718666",
+      "artifact_path": null,
+      "log": "Build failed: Build failed: Error: source directory '/workspace/openbuilder-workspace/src/common-utils' not found. Run 'openbuilder clone' first.\n\n",
+      "error": "Build failed: Error: source directory '/workspace/openbuilder-workspace/src/common-utils' not found. Run 'openbuilder clone' first.\n"
+    },
+    {
+      "id": "20260511_161119",
+      "project": "perception_demo",
+      "mode": "release",
+      "platform": "linux-x86_64",
+      "status": "failed",
+      "created_at": "2026-05-11T16:11:19.697511",
+      "finished_at": "2026-05-11T16:11:19.842808",
+      "artifact_path": null,
+      "log": "Build failed: Build failed: Error: source directory '/workspace/openbuilder-workspace/src/common-utils' not found. Run 'openbuilder clone' first.\n\n",
+      "error": "Build failed: Error: source directory '/workspace/openbuilder-workspace/src/common-utils' not found. Run 'openbuilder clone' first.\n"
+    },
+    {
+      "id": "20260511_161020",
+      "project": "perception_demo",
+      "mode": "release",
+      "platform": "linux-x86_64",
+      "status": "success",
+      "created_at": "2026-05-11T16:10:20.326531",
+      "finished_at": "2026-05-11T16:10:20.813529",
+      "artifact_path": "s3://openbuilder-builds/build/10031/target-10031.tar.gz",
+      "log": "Using build type from CLI: release\nNo repos in manifest. Run 'openbuilder configure project <name>' first.\n\nPublished as build 10031.\n",
+      "error": null,
+      "repos": [
+        {
+          "name": "common-utils",
+          "commit": ""
+        },
+        {
+          "name": "sensor-abstraction",
+          "commit": ""
+        }
+      ]
+    },
+    {
+      "id": "20260511_155448",
+      "project": "perception_demo",
+      "mode": "debug",
+      "platform": "linux-x86_64",
+      "status": "success",
+      "created_at": "2026-05-11T15:54:48.264459",
+      "finished_at": "2026-05-11T15:54:48.471325",
+      "artifact_path": "s3://openbuilder-builds/build/10030/target-10030.tar.gz",
+      "log": "Using build type from CLI: debug\nNo repos in manifest. Run 'openbuilder configure project <name>' first.\n\nPublished as build 10030.\n",
+      "error": null
+    },
+    {
+      "id": "20260511_155429",
+      "project": "perception_demo",
+      "mode": "release",
+      "platform": "linux-x86_64",
+      "status": "success",
+      "created_at": "2026-05-11T15:54:29.011411",
+      "finished_at": "2026-05-11T15:54:29.287238",
+      "artifact_path": "s3://openbuilder-builds/build/10029/target-10029.tar.gz",
+      "log": "Using build type from CLI: release\nNo repos in manifest. Run 'openbuilder configure project <name>' first.\n\nPublished as build 10029.\n",
+      "error": null
+    },
+    {
       "id": "20260427_133135",
       "platform": "linux-arm64",
       "build_type": "debug",
