@@ -169,8 +169,6 @@ function renderCompareResult(data, container) {
         { label: 'Project', leftVal: left.project, rightVal: right.project, same: summary.same_project },
         { label: 'Platform', leftVal: left.platform, rightVal: right.platform, same: summary.same_platform },
         { label: 'Mode', leftVal: left.mode, rightVal: right.mode, same: summary.same_mode },
-        { label: 'Status', leftVal: left.status, rightVal: right.status, same: left.status === right.status },
-        { label: 'Build Number', leftVal: left.build_number || '-', rightVal: right.build_number || '-', same: left.build_number === right.build_number },
     ];
 
     html += '<div>';
@@ -178,9 +176,9 @@ function renderCompareResult(data, container) {
         const bg = row.same ? GREEN : RED;
         const fg = row.same ? GREEN_TEXT : RED_TEXT;
         html += `<div style="display:flex;align-items:center;padding:12px 16px;margin-bottom:8px;border-radius:8px;background:${bg};color:${fg};">
+            <div style="width:40px;text-align:center;font-size:20px;">${row.same ? '&check;' : '&times;'}</div>
             <div style="width:120px;font-weight:600;">${row.label}</div>
             <div style="flex:1;font-family:monospace;">${row.leftVal}</div>
-            <div style="width:60px;text-align:center;font-size:20px;">${row.same ? '&check;' : '&times;'}</div>
             <div style="flex:1;font-family:monospace;">${row.rightVal}</div>
         </div>`;
     }
