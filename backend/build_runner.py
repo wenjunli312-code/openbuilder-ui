@@ -22,7 +22,7 @@ WORKSPACE_DIR = Path.home() / "workspace" / "openbuilder-workspace"
 sys.path.insert(0, str(OPENBUILDER_SRC))
 
 # ── S3 config (from workspace manifest) ───────────────────────────────────────
-_S3_ENDPOINT = "http://localhost:9000"
+_S3_ENDPOINT = "http://host.docker.internal:9000"
 _S3_BUCKET = "openbuilder-builds"
 _S3_ACCESS_KEY = "minioadmin"
 _S3_SECRET_KEY = "minioadmin"

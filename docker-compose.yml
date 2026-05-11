@@ -17,4 +17,6 @@ services:
     environment:
       - FLASK_ENV=development
       - TZ=Asia/Shanghai
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
