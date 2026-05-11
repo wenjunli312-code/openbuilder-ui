@@ -21,7 +21,7 @@ app = Flask(__name__, static_folder=None)
 # Paths
 BASE_DIR = Path(__file__).parent
 DOWNLOADS_DIR = BASE_DIR / "downloads"
-WORKSPACE_DIR = Path("/workspace/openbuilder-workspace")
+WORKSPACE_DIR = Path(os.environ.get("WORKSPACE_DIR", "/workspace/openbuilder-workspace"))
 
 
 # ---------------------------------------------------------------------------

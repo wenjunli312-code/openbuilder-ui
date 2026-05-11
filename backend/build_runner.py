@@ -16,7 +16,7 @@ from build_store import update_build
 
 # ── OpenBuilder paths ──────────────────────────────────────────────────────────
 OPENBUILDER_SRC = Path("/root/workspace/code/openbuilder/src")
-WORKSPACE_DIR = Path("/workspace/openbuilder-workspace")
+WORKSPACE_DIR = Path(os.environ.get("WORKSPACE_DIR", "/workspace/openbuilder-workspace"))
 
 # Add openbuilder to path
 sys.path.insert(0, str(OPENBUILDER_SRC))
@@ -151,6 +151,9 @@ def run_build(build_id: str, project: str, mode: str, platform: str, manifest: s
             # Ensure workspace section exists
             if "workspace" not in manifest_data:
                 manifest_data["workspace"] = {"name": project, "current_project": project}
+            # Set platform for cross-compile
+            if platform:
+                manifest_data["workspace"]["current_platform"] = platform
             manifest_file = ob_dir / "manifest.yaml"
             with open(manifest_file, "w") as f:
                 yaml.dump(manifest_data, f, default_flow_style=False, sort_keys=False, allow_unicode=True)

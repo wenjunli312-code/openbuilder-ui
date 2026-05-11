@@ -6,19 +6,17 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      # Mount downloads for artifacts
       - ./backend/downloads:/app/downloads
-      # Mount frontend static files
       - ./frontend:/frontend
-      # Mount workspace for manifest and projects access
-      - ~/workspace/openbuilder-workspace:/workspace/openbuilder-workspace
-      # Mount openbuilder code for build commands
+      - ~/workspace/openbuilder-workspace:/Users/kaka/workspace/openbuilder-workspace
       - ~/workspace/code/openbuilder:/root/workspace/code/openbuilder
-      # Persist builds.json between restarts
       - ./backend/builds.json:/app/builds.json
+      # Docker socket to run dockcross containers from within backend
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - FLASK_ENV=development
       - TZ=Asia/Shanghai
+      - WORKSPACE_DIR=/Users/kaka/workspace/openbuilder-workspace
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
