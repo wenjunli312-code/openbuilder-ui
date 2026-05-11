@@ -1,0 +1,224 @@
+{
+  "builds": [
+    {
+      "id": "20260427_133135",
+      "platform": "linux-arm64",
+      "build_type": "debug",
+      "status": "success",
+      "created_at": "2026-04-27T13:31:35.381189",
+      "finished_at": "2026-04-27T13:31:37.620635",
+      "artifact_path": "s3://openbuilder-builds/build/10025/target-10025.tar.gz",
+      "log": "Using build type from manifest: release\nNo repos in manifest. Run 'openbuilder configure project <name>' first.\n\nPublished as build 10025.\n",
+      "error": null
+    },
+    {
+      "id": "20260427_133134",
+      "platform": "linux-arm64",
+      "build_type": "debug",
+      "status": "success",
+      "created_at": "2026-04-27T13:31:34.949184",
+      "finished_at": "2026-04-27T13:31:37.204542",
+      "artifact_path": "s3://openbuilder-builds/build/10025/target-10025.tar.gz",
+      "log": "Using build type from manifest: release\nNo repos in manifest. Run 'openbuilder configure project <name>' first.\n\nPublished as build 10025.\n",
+      "error": null
+    },
+    {
+      "id": "20260427_133134",
+      "platform": "linux-arm64",
+      "build_type": "debug",
+      "status": "running",
+      "created_at": "2026-04-27T13:31:34.282883",
+      "finished_at": null,
+      "artifact_path": null,
+      "log": "Using build type from manifest: release\nNo repos in manifest. Run 'openbuilder configure project <name>' first.\n\nBuild ID: 10024, packaging...\n",
+      "error": null
+    },
+    {
+      "id": "20260427_133132",
+      "platform": "linux-arm64",
+      "build_type": "debug",
+      "status": "success",
+      "created_at": "2026-04-27T13:31:32.936855",
+      "finished_at": "2026-04-27T13:31:35.562592",
+      "artifact_path": "s3://openbuilder-builds/build/10024/target-10024.tar.gz",
+      "log": "Using build type from manifest: release\nNo repos in manifest. Run 'openbuilder configure project <name>' first.\n\nPublished as build 10024.\n",
+      "error": null
+    },
+    {
+      "id": "20260426_165139",
+      "platform": "linux-arm64",
+      "build_type": "debug",
+      "status": "success",
+      "created_at": "2026-04-26T16:51:39.025625",
+      "finished_at": "2026-04-26T16:51:41.461585",
+      "artifact_path": "s3://openbuilder-builds/build/10023/target-10023.tar.gz",
+      "log": "No repos in manifest. Run 'openbuilder configure project <name>' first.\n\nPublished as build 10023.\n",
+      "error": null
+    },
+    {
+      "id": "20260426_165043",
+      "platform": "linux-arm64",
+      "build_type": "debug",
+      "status": "success",
+      "created_at": "2026-04-26T16:50:43.983847",
+      "finished_at": "2026-04-26T16:50:46.421014",
+      "artifact_path": "s3://openbuilder-builds/build/10022/target-10022.tar.gz",
+      "log": "No repos in manifest. Run 'openbuilder configure project <name>' first.\n\nPublished as build 10022.\n",
+      "error": null
+    },
+    {
+      "id": "20260426_164748",
+      "platform": "linux-arm64",
+      "build_type": "debug",
+      "status": "success",
+      "created_at": "2026-04-26T16:47:48.278019",
+      "finished_at": "2026-04-26T16:47:50.831212",
+      "artifact_path": "",
+      "log": "\n\nBuild completed successfully.\n",
+      "error": null
+    },
+    {
+      "id": "20260426_164552",
+      "platform": "linux-arm64",
+      "build_type": "debug",
+      "status": "success",
+      "created_at": "2026-04-26T16:45:52.879708",
+      "finished_at": "2026-04-26T16:45:55.433824",
+      "artifact_path": "",
+      "log": "\n\nBuild completed successfully.\n",
+      "error": null
+    },
+    {
+      "id": "20260426_164532",
+      "platform": "linux-arm64",
+      "build_type": "debug",
+      "status": "success",
+      "created_at": "2026-04-26T16:45:32.271339",
+      "finished_at": "2026-04-26T16:45:34.877520",
+      "artifact_path": "",
+      "log": "\n\nBuild completed successfully.\n",
+      "error": null
+    },
+    {
+      "id": "20260426_164407",
+      "platform": "linux-arm64",
+      "build_type": "debug",
+      "status": "success",
+      "created_at": "2026-04-26T16:44:07.692839",
+      "finished_at": "2026-04-26T16:44:10.246952",
+      "artifact_path": "",
+      "log": "\n\nBuild completed successfully.\n",
+      "error": null
+    },
+    {
+      "id": "20260426_164309",
+      "platform": "linux-arm64",
+      "build_type": "debug",
+      "status": "success",
+      "created_at": "2026-04-26T16:43:09.009249",
+      "finished_at": "2026-04-26T16:43:11.544999",
+      "artifact_path": "",
+      "log": "\n\nBuild completed successfully.\n",
+      "error": null
+    },
+    {
+      "id": "20260426_164122",
+      "platform": "linux-arm64",
+      "build_type": "debug",
+      "status": "success",
+      "created_at": "2026-04-26T16:41:22.037850",
+      "finished_at": "2026-04-26T16:41:24.583401",
+      "artifact_path": "",
+      "log": "\n\nBuild completed successfully.\n",
+      "error": null
+    },
+    {
+      "id": "20260426_164037",
+      "platform": "linux-arm64",
+      "build_type": "debug",
+      "status": "success",
+      "created_at": "2026-04-26T16:40:37.895736",
+      "finished_at": "2026-04-26T16:40:40.471622",
+      "artifact_path": "",
+      "log": "\n\nBuild completed successfully.\n",
+      "error": null
+    },
+    {
+      "id": "20260426_163901",
+      "platform": "linux-arm64",
+      "build_type": "debug",
+      "status": "success",
+      "created_at": "2026-04-26T16:39:01.682259",
+      "finished_at": "2026-04-26T16:39:04.227958",
+      "artifact_path": "",
+      "log": "\n\nBuild completed successfully.\n",
+      "error": null
+    },
+    {
+      "id": "20260426_163802",
+      "platform": "linux-arm64",
+      "build_type": "debug",
+      "status": "failed",
+      "created_at": "2026-04-26T16:38:02.477426",
+      "finished_at": "2026-04-26T16:38:04.982578",
+      "artifact_path": null,
+      "log": "Build failed: 'NoneType' object has no attribute 'strip'\n",
+      "error": "'NoneType' object has no attribute 'strip'"
+    },
+    {
+      "id": "20260426_163657",
+      "platform": "linux-arm64",
+      "build_type": "debug",
+      "status": "failed",
+      "created_at": "2026-04-26T16:36:57.801048",
+      "finished_at": "2026-04-26T16:37:03.590411",
+      "artifact_path": null,
+      "log": "Build failed: Publish failed: None\n",
+      "error": "Publish failed: None"
+    },
+    {
+      "id": "20260426_163559",
+      "platform": "linux-arm64",
+      "build_type": "debug",
+      "status": "failed",
+      "created_at": "2026-04-26T16:35:59.564678",
+      "finished_at": "2026-04-26T16:35:59.835341",
+      "artifact_path": null,
+      "log": "Build failed: Failed to init workspace: None\n",
+      "error": "Failed to init workspace: None"
+    },
+    {
+      "id": "20260426_163318",
+      "platform": "linux-arm64",
+      "build_type": "debug",
+      "status": "failed",
+      "created_at": "2026-04-26T16:33:18.920784",
+      "finished_at": "2026-04-26T16:33:18.934301",
+      "artifact_path": null,
+      "log": "Build failed: [Errno 2] No such file or directory: 'openbuilder'\n",
+      "error": "[Errno 2] No such file or directory: 'openbuilder'"
+    },
+    {
+      "id": "20260426_163256",
+      "platform": "linux-arm64",
+      "build_type": "debug",
+      "status": "pending",
+      "created_at": "2026-04-26T16:32:56.429793",
+      "finished_at": null,
+      "artifact_path": null,
+      "log": "",
+      "error": null
+    },
+    {
+      "id": "20260426_162315",
+      "platform": "linux-arm64",
+      "build_type": "debug",
+      "status": "success",
+      "created_at": "2026-04-26T16:23:15.837814",
+      "finished_at": "2026-04-26T16:23:18.857460",
+      "artifact_path": "/Users/kaka/workspace/code/openbuilder-ui/backend/downloads/20260426_162315_linux-arm64_debug.tar.gz",
+      "log": "Build completed successfully.\n",
+      "error": null
+    }
+  ]
+}

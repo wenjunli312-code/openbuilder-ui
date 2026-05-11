@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenBuilder Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔨 OpenBuilder Dashboard</h1>
+            <p class="credit">Built by 卡卡的全栈工程师 + Claude Code + 卡卡的测试</p>
+        </header>
+
+        <!-- Builds Table -->
+        <section class="builds">
+            <div class="builds-header">
+                <h2>构建历史</h2>
+                <div class="builds-header-actions">
+                    <button id="open-new-build-dialog" class="btn-action" onclick="openNewBuildDialog()">+ 发起新构建</button>
+                    <button id="open-compare-dialog" class="btn-action btn-compare" onclick="openCompareDialog()">🔍 比较</button>
+                </div>
+            </div>
+            <table class="builds-table">
+                <thead>
+                    <tr>
+                        <th>Build ID</th>
+                        <th>Project</th>
+                        <th>Platform</th>
+                        <th>Mode</th>
+                        <th>Status</th>
+                        <th>Build Time</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="builds-tbody">
+                    <tr><td colspan="7" class="loading">Loading...</td></tr>
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <!-- New Build Dialog -->
+    <div id="dialog-overlay" class="dialog-overlay" onclick="closeDialogOnOverlay(event)">
+        <div class="dialog">
+            <div class="dialog-header">
+                <h3>发起新构建</h3>
+                <button class="dialog-close" onclick="closeDialog()">×</button>
+            </div>
+            <div class="dialog-body">
+                <div class="dialog-field">
+                    <label for="dialog-project">Project</label>
+                    <select id="dialog-project">
+                        <option value="demo">demo</option>
+                    </select>
+                </div>
+                <div class="dialog-field">
+                    <label for="dialog-mode">Mode</label>
+                    <select id="dialog-mode">
+                        <option value="release">release</option>
+                        <option value="debug">debug</option>
+                        <option value="releasewithdebuginfo">release with debug info</option>
+                    </select>
+                </div>
+                <div class="dialog-field">
+                    <label for="dialog-platform">编译平台</label>
+                    <select id="dialog-platform">
+                        <option value="linux-x86_64">linux-x86_64 (本地)</option>
+                        <option value="linux-arm64">linux-arm64</option>
+                        <option value="linux-armv7">linux-armv7</option>
+                    </select>
+                </div>
+                <div class="dialog-field manifest-field">
+                    <div class="manifest-label-row">
+                        <label for="dialog-manifest">manifest.yaml</label>
+                        <button class="btn-load-manifest" id="btn-load-manifest" onclick="loadManifest()" type="button">↻ 加载</button>
+                    </div>
+                    <textarea id="dialog-manifest" class="manifest-textarea" rows="14" spellcheck="false"></textarea>
+                    <p class="manifest-hint">可手动编辑 manifest 内容，构建时将写入工作区</p>
+                </div>
+            </div>
+            <div class="dialog-footer">
+                <button class="btn-cancel" onclick="closeDialog()">取消</button>
+                <button id="dialog-confirm" onclick="confirmBuild()">确认构建</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compare Dialog -->
+    <div id="compare-overlay" class="dialog-overlay" onclick="closeCompareOnOverlay(event)">
+        <div class="dialog compare-dialog">
+            <div class="dialog-header">
+                <h3>构建比较</h3>
+                <button class="dialog-close" onclick="closeCompareDialog()">×</button>
+            </div>
+            <div class="dialog-body">
+                <div class="compare-inputs">
+                    <div class="dialog-field">
+                        <label for="compare-left">Build ID 1 (左)</label>
+                        <input type="text" id="compare-left" placeholder="例: 20260511_125500">
+                    </div>
+                    <div class="dialog-field">
+                        <label for="compare-right">Build ID 2 (右)</label>
+                        <input type="text" id="compare-right" placeholder="例: 20260510_143200">
+                    </div>
+                </div>
+                <button class="btn-run-compare" id="btn-run-compare" onclick="runCompare()">比较</button>
+                <div id="compare-result" class="compare-result" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

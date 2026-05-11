@@ -1,0 +1,17 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      # Mount downloads for artifacts
+      - ./backend/downloads:/app/downloads
+      # Mount frontend static files
+      - ./frontend:/frontend
+      # Mount workspace for manifest and projects access
+      - ~/workspace/openbuilder-workspace:/workspace/openbuilder-workspace
+    environment:
+      - FLASK_ENV=development
+    restart: unless-stopped
