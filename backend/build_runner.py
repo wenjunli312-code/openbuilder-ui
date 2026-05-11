@@ -142,16 +142,6 @@ def run_build(build_id: str, project: str, mode: str, platform: str, manifest: s
             ob_dir = WORKSPACE_DIR / ".openbuilder"
             ob_dir.mkdir(parents=True, exist_ok=True)
 
-            # GitHub token for private repos (inject into URLs before writing manifest)
-            github_token = os.environ.get("GITHUB_TOKEN", "")
-            for r in manifest_data.get("projects", []):
-                if r.get("url", "").startswith("https://github.com/"):
-                    r["url"] = r["url"].replace(
-                        "https://github.com/",
-                        f"https://{github_token}@github.com/",
-                        1,
-                    )
-
             # Step 1: Write manifest.yaml (convert repos -> projects for openbuilder)
             update_build(build_id, log="Writing manifest.yaml...\n")
             import yaml
@@ -164,7 +154,8 @@ def run_build(build_id: str, project: str, mode: str, platform: str, manifest: s
             # Set platform for cross-compile
             if platform:
                 manifest_data["workspace"]["current_platform"] = platform
-            # Inject GitHub token into project URLs
+            # Inject GitHub token into project URLs (must be done after yaml.safe_load, before writing)
+            github_token = os.environ.get("GITHUB_TOKEN", "")
             for r in manifest_data.get("projects", []):
                 if r.get("url", "").startswith("https://github.com/"):
                     r["url"] = r["url"].replace(
