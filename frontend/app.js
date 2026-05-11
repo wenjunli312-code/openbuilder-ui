@@ -16,7 +16,6 @@ function closeDialog() {
     document.getElementById('dialog-overlay').classList.remove('active');
 }
 
-}
 
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeDialog();
@@ -34,7 +33,6 @@ function closeCompareDialog() {
     document.getElementById('compare-overlay').classList.remove('active');
 }
 
-}
 
 // Auto-reload manifest when project selection changes
 document.addEventListener('DOMContentLoaded', () => {
