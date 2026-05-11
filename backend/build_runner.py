@@ -16,7 +16,7 @@ from build_store import update_build
 
 # ── OpenBuilder paths ──────────────────────────────────────────────────────────
 OPENBUILDER_SRC = Path("/root/workspace/code/openbuilder/src")
-WORKSPACE_DIR = Path.home() / "workspace" / "openbuilder-workspace"
+WORKSPACE_DIR = Path("/workspace/openbuilder-workspace")
 
 # Add openbuilder to path
 sys.path.insert(0, str(OPENBUILDER_SRC))
