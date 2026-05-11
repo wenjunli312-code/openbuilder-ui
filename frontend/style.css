@@ -190,7 +190,7 @@ section h2 {
 .dialog {
     background: white;
     border-radius: 14px;
-    width: 600px;
+    width: 900px;
     max-width: 95vw;
     max-height: 90vh;
     overflow-y: auto;
@@ -364,4 +364,15 @@ section h2 {
 #dialog-confirm:disabled {
     background: #a0c4e8;
     cursor: not-allowed;
+}
+
+/* Build ID click to copy */
+.build-id {
+    cursor: pointer;
+    user-select: text;
+}
+
+.build-id:hover {
+    color: #1a5fa8;
+    text-decoration: underline;
 }

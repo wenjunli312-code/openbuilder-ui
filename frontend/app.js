@@ -191,7 +191,7 @@ function renderBuildRow(build) {
 
     return `
         <tr>
-            <td class="build-id">${build.id}</td>
+            <td class="build-id" onclick="copyBuildId('${build.id}')" title="点击复制">${build.id}</td>
             <td class="meta"><span>${project}</span></td>
             <td class="meta"><span>${build.platform || '-'}</span></td>
             <td class="meta"><span>${mode}</span></td>
@@ -212,6 +212,19 @@ function renderBuilds(builds) {
     }
 
     tbody.innerHTML = active.map(renderBuildRow).join('');
+}
+
+
+// ---------------------------------------------------------------------------
+// Copy Build ID
+// ---------------------------------------------------------------------------
+
+function copyBuildId(id) {
+    navigator.clipboard.writeText(id).then(() => {
+        // Brief visual feedback could be added here
+    }).catch(err => {
+        console.error('Failed to copy:', err);
+    });
 }
 
 // ---------------------------------------------------------------------------
