@@ -16,4 +16,5 @@ services:
       - ~/workspace/code/openbuilder:/root/workspace/code/openbuilder
     environment:
       - FLASK_ENV=development
+      - TZ=Asia/Shanghai
     restart: unless-stopped
