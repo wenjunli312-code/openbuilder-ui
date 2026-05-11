@@ -1,6 +1,30 @@
 {
   "builds": [
     {
+      "id": "20260511_163232",
+      "project": "perception_demo",
+      "mode": "release",
+      "platform": "linux-x86_64",
+      "status": "failed",
+      "created_at": "2026-05-11T16:32:32.852434",
+      "finished_at": "2026-05-11T16:32:33.591358",
+      "artifact_path": null,
+      "log": "Build failed: Build failed: CMake Error at CMakeLists.txt:7 (find_package):\n  By not providing \"Findspdlog.cmake\" in CMAKE_MODULE_PATH this project has\n  asked CMake to find a package configuration file provided by \"spdlog\", but\n  CMake did not find one.\n\n  Could not find a package configuration file provided by \"spdlog\" with any\n  of the following names:\n\n    spdlogConfig.cmake\n    spdlog-config.cmake\n\n  Add the installation prefix of \"spdlog\" to CMAKE_PREFIX_PATH or set\n  \"spdlog_DIR\" to a directory containing one of the above files.  If \"spdlog\"\n  provides a separate development package or SDK, be sure it has been\n  installed.\n\n\nError: command failed with exit code 1\n\n",
+      "error": "Build failed: CMake Error at CMakeLists.txt:7 (find_package):\n  By not providing \"Findspdlog.cmake\" in CMAKE_MODULE_PATH this project has\n  asked CMake to find a package configuration file provided by \"spdlog\", but\n  CMake did not find one.\n\n  Could not find a package configuration file provided by \"spdlog\" with any\n  of the following names:\n\n    spdlogConfig.cmake\n    spdlog-config.cmake\n\n  Add the installation prefix of \"spdlog\" to CMAKE_PREFIX_PATH or set\n  \"spdlog_DIR\" to a directory containing one of the above files.  If \"spdlog\"\n  provides a separate development package or SDK, be sure it has been\n  installed.\n\n\nError: command failed with exit code 1\n"
+    },
+    {
+      "id": "20260511_162709",
+      "project": "perception_demo",
+      "mode": "release",
+      "platform": "linux-x86_64",
+      "status": "failed",
+      "created_at": "2026-05-11T16:27:09.480643",
+      "finished_at": "2026-05-11T16:27:09.905071",
+      "artifact_path": null,
+      "log": "Build failed: Build failed: CMake Error: CMake was unable to find a build program corresponding to \"Unix Makefiles\".  CMAKE_MAKE_PROGRAM is not set.  You probably need to select a different build tool.\nCMake Error: CMAKE_C_COMPILER not set, after EnableLanguage\nCMake Error: CMAKE_CXX_COMPILER not set, after EnableLanguage\nError: command failed with exit code 1\n\n",
+      "error": "Build failed: CMake Error: CMake was unable to find a build program corresponding to \"Unix Makefiles\".  CMAKE_MAKE_PROGRAM is not set.  You probably need to select a different build tool.\nCMake Error: CMAKE_C_COMPILER not set, after EnableLanguage\nCMake Error: CMAKE_CXX_COMPILER not set, after EnableLanguage\nError: command failed with exit code 1\n"
+    },
+    {
       "id": "20260511_test2",
       "project": "perception_demo",
       "mode": "debug",

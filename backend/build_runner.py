@@ -189,6 +189,9 @@ def run_build(build_id: str, project: str, mode: str, platform: str, manifest: s
             log = (result.stdout or "") + "\n"
             if result.returncode != 0:
                 raise RuntimeError(f"Build failed: {result.stderr or result.stdout}")
+            # Check if build actually produced something
+            if "Build complete." not in log:
+                raise RuntimeError(f"Build did not complete successfully. Output:\n{log}")
             update_build(build_id, log=log)
 
             # Step 4: Capture commit hashes
