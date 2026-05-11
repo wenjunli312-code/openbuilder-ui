@@ -147,39 +147,44 @@ async function runCompare() {
 function renderCompareResult(data, container) {
     const { left, right, summary, repo_comparisons } = data;
 
-    const statusColors = {
-        unchanged: '#d4edda',
-        modified: '#fff3cd',
-        left_only: '#f8d7da',
-        right_only: '#f8d7da',
-    };
-    const statusTextColors = {
-        unchanged: '#155724',
-        modified: '#856404',
-        left_only: '#721c24',
-        right_only: '#721c24',
-    };
+    const GREEN = '#d4edda';
+    const RED = '#f8d7da';
+    const GREEN_TEXT = '#155724';
+    const RED_TEXT = '#721c24';
 
-    let html = `
-        <div class="compare-builds-info" style="display:flex;gap:16px;margin-bottom:20px;">
-            <div style="flex:1;padding:16px;background:#f0f7ff;border-radius:8px;">
-                <strong style="font-size:16px;">左: ${left.id}</strong><br>
-                <span style="color:#555;">${left.project} / ${left.mode} / ${left.platform}</span><br>
-                <span style="padding:4px 8px;border-radius:4px;background:${left.status === 'success' ? '#d4edda' : '#f8d7da'};color:${left.status === 'success' ? '#155724' : '#721c24'};">${left.status}</span>
-            </div>
-            <div style="flex:1;padding:16px;background:#f0f7ff;border-radius:8px;">
-                <strong style="font-size:16px;">右: ${right.id}</strong><br>
-                <span style="color:#555;">${right.project} / ${right.mode} / ${right.platform}</span><br>
-                <span style="padding:4px 8px;border-radius:4px;background:${right.status === 'success' ? '#d4edda' : '#f8d7da'};color:${right.status === 'success' ? '#155724' : '#721c24'};">${right.status}</span>
-            </div>
+    let html = `<div style="margin-bottom:24px;">`;
+
+    // Left/Right header
+    html += `<div style="display:flex;gap:12px;margin-bottom:20px;">
+        <div style="flex:1;padding:14px 16px;background:#e8f4ff;border-radius:8px;font-weight:bold;font-size:15px;">
+            &larr; 左: <span style="font-family:monospace;">${left.id}</span>
         </div>
-        <div style="margin-bottom:20px;padding:12px;background:#f8f9fa;border-radius:8px;">
-            <strong>Summary:</strong> 
-            同项目: ${summary.same_project ? '✓' : '✗'} &nbsp;
-            同平台: ${summary.same_platform ? '✓' : '✗'} &nbsp;
-            同模式: ${summary.same_mode ? '✓' : '✗'}
+        <div style="flex:1;padding:14px 16px;background:#e8f4ff;border-radius:8px;font-weight:bold;font-size:15px;">
+            &rarr; 右: <span style="font-family:monospace;">${right.id}</span>
         </div>
-    `;
+    </div>`;
+
+    // Comparison rows - each dimension on its own row
+    const compareRows = [
+        { label: 'Project', leftVal: left.project, rightVal: right.project, same: summary.same_project },
+        { label: 'Platform', leftVal: left.platform, rightVal: right.platform, same: summary.same_platform },
+        { label: 'Mode', leftVal: left.mode, rightVal: right.mode, same: summary.same_mode },
+        { label: 'Status', leftVal: left.status, rightVal: right.status, same: left.status === right.status },
+        { label: 'Build Number', leftVal: left.build_number || '-', rightVal: right.build_number || '-', same: left.build_number === right.build_number },
+    ];
+
+    html += '<div>';
+    for (const row of compareRows) {
+        const bg = row.same ? GREEN : RED;
+        const fg = row.same ? GREEN_TEXT : RED_TEXT;
+        html += `<div style="display:flex;align-items:center;padding:12px 16px;margin-bottom:8px;border-radius:8px;background:${bg};color:${fg};">
+            <div style="width:120px;font-weight:600;">${row.label}</div>
+            <div style="flex:1;font-family:monospace;">${row.leftVal}</div>
+            <div style="width:60px;text-align:center;font-size:20px;">${row.same ? '&check;' : '&times;'}</div>
+            <div style="flex:1;font-family:monospace;">${row.rightVal}</div>
+        </div>`;
+    }
+    html += '</div>';
 
     if (repo_comparisons.length > 0) {
         html += '<div style="margin-top:16px;"><strong>Repo 对比:</strong>';
