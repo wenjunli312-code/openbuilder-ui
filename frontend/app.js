@@ -16,10 +16,6 @@ function closeDialog() {
     document.getElementById('dialog-overlay').classList.remove('active');
 }
 
-function closeDialogOnOverlay(event) {
-    if (event.target === event.currentTarget) {
-        closeDialog();
-    }
 }
 
 document.addEventListener('keydown', (e) => {
@@ -38,10 +34,6 @@ function closeCompareDialog() {
     document.getElementById('compare-overlay').classList.remove('active');
 }
 
-function closeCompareOnOverlay(event) {
-    if (event.target === event.currentTarget) {
-        closeCompareDialog();
-    }
 }
 
 // Auto-reload manifest when project selection changes
