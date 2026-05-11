@@ -17,6 +17,7 @@ services:
       - FLASK_ENV=development
       - TZ=Asia/Shanghai
       - WORKSPACE_DIR=/Users/kaka/workspace/openbuilder-workspace
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped

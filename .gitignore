@@ -1,0 +1,11 @@
+# Local secrets
+.env
+
+# Build artifacts (local history)
+backend/builds.json
+backend/downloads/
+
+# IDE / OS
+.vscode/
+.DS_Store
+*.swp

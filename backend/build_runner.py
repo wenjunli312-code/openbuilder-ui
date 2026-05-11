@@ -162,6 +162,16 @@ def run_build(build_id: str, project: str, mode: str, platform: str, manifest: s
             # Prepare env
             env = os.environ.copy()
             env["PYTHONPATH"] = "/root/workspace/code/openbuilder/src"
+            # GitHub token for private repos (inject into URL before clone)
+            github_token = os.environ.get("GITHUB_TOKEN", "")
+
+            for r in manifest_data.get("projects", []):
+                if r.get("url", "").startswith("https://github.com/"):
+                    r["url"] = r["url"].replace(
+                        "https://github.com/",
+                        f"https://{github_token}@github.com/",
+                        1,
+                    )
 
             # Step 2: Clone repos
             update_build(build_id, log="Cloning repos...\n")
