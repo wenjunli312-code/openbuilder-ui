@@ -142,6 +142,16 @@ def run_build(build_id: str, project: str, mode: str, platform: str, manifest: s
             ob_dir = WORKSPACE_DIR / ".openbuilder"
             ob_dir.mkdir(parents=True, exist_ok=True)
 
+            # GitHub token for private repos (inject into URLs before writing manifest)
+            github_token = os.environ.get("GITHUB_TOKEN", "")
+            for r in manifest_data.get("projects", []):
+                if r.get("url", "").startswith("https://github.com/"):
+                    r["url"] = r["url"].replace(
+                        "https://github.com/",
+                        f"https://{github_token}@github.com/",
+                        1,
+                    )
+
             # Step 1: Write manifest.yaml (convert repos -> projects for openbuilder)
             update_build(build_id, log="Writing manifest.yaml...\n")
             import yaml
@@ -154,17 +164,7 @@ def run_build(build_id: str, project: str, mode: str, platform: str, manifest: s
             # Set platform for cross-compile
             if platform:
                 manifest_data["workspace"]["current_platform"] = platform
-            manifest_file = ob_dir / "manifest.yaml"
-            with open(manifest_file, "w") as f:
-                yaml.dump(manifest_data, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
-            update_build(build_id, log=f"manifest.yaml written ({len(manifest)} bytes)\n")
-
-            # Prepare env
-            env = os.environ.copy()
-            env["PYTHONPATH"] = "/root/workspace/code/openbuilder/src"
-            # GitHub token for private repos (inject into URL before clone)
-            github_token = os.environ.get("GITHUB_TOKEN", "")
-
+            # Inject GitHub token into project URLs
             for r in manifest_data.get("projects", []):
                 if r.get("url", "").startswith("https://github.com/"):
                     r["url"] = r["url"].replace(
@@ -172,6 +172,14 @@ def run_build(build_id: str, project: str, mode: str, platform: str, manifest: s
                         f"https://{github_token}@github.com/",
                         1,
                     )
+            manifest_file = ob_dir / "manifest.yaml"
+            with open(manifest_file, "w") as f:
+                yaml.dump(manifest_data, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
+            update_build(build_id, log=f"manifest.yaml written ({len(manifest)} bytes)\n")
+
+            # Prepare env for subprocess
+            env = os.environ.copy()
+            env["PYTHONPATH"] = "/root/workspace/code/openbuilder/src"
 
             # Step 2: Clone repos
             update_build(build_id, log="Cloning repos...\n")
