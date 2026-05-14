@@ -111,7 +111,8 @@ def _publish_to_s3(target_dir, build_id, platform="", mode=""):
 
     tar_buffer = io.BytesIO()
     with tarfile.open(fileobj=tar_buffer, mode="w:gz") as tar:
-        tar.add(package_dir, arcname="target")
+        arcname = f"target/{platform}/{mode}" if platform and mode else "target"
+        tar.add(package_dir, arcname=arcname)
     tar_buffer.seek(0)
 
     info = {
