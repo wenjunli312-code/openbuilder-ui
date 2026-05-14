@@ -262,7 +262,7 @@ def create_new_build():
         return jsonify({"error": f"Invalid platform. Must be one of: {valid_platforms}"}), 400
 
     # Create build record
-    build = create_build(project=project, mode=mode, platform=platform)
+    build = create_build(project=project, mode=mode, platform=platform, target=target)
 
     # Start build in background (uses fixed workspace at ~/workspace/openbuilder-workspace)
     run_build(build["id"], project, mode, platform, target, manifest)

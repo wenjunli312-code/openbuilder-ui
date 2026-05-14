@@ -25,16 +25,18 @@ def _save_store(store: dict) -> None:
         json.dump(store, f, indent=2)
 
 
-def create_build(project: str, mode: str, platform: str) -> dict:
+def create_build(project: str, mode: str, platform: str, target: str = "") -> dict:
     """Create a new build record with pending status."""
     now = datetime.now()
     build_id = now.strftime("%Y%m%d_%H%M%S")
+
 
     build = {
         "id": build_id,
         "project": project,
         "mode": mode,
         "platform": platform,
+        "target": target,
         "status": "pending",
         "created_at": now.isoformat(),
         "finished_at": None,
