@@ -212,12 +212,14 @@ function renderBuildRow(build) {
         : '-';
 
     const project = build.project || build.project_name || '-';
+    const target = build.target || '-';
     const mode = build.mode || build.build_type || '-';
 
     return `
         <tr>
             <td class="build-id" onclick="window.open('build.html?id=${build.id}', '_blank')" title="点击查看详情">${build.id}</td>
             <td class="meta"><span>${project}</span></td>
+            <td class="meta"><span>${target}</span></td>
             <td class="meta"><span>${build.platform || '-'}</span></td>
             <td class="meta"><span>${mode}</span></td>
             <td>${statusLabel(build.status)}</td>
