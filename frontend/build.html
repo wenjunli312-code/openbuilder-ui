@@ -283,6 +283,10 @@
                 <div class="card-value" id="card-project">-</div>
             </div>
             <div class="info-card">
+                <div class="card-label">Target</div>
+                <div class="card-value" id="card-target">-</div>
+            </div>
+            <div class="info-card">
                 <div class="card-label">Platform</div>
                 <div class="card-value" id="card-platform">-</div>
             </div>
@@ -413,6 +417,7 @@
                 document.getElementById('card-id').textContent = build.id;
                 document.getElementById('card-status').innerHTML = statusLabel(build.status);
                 document.getElementById('card-project').textContent = build.project || '-';
+                document.getElementById('card-target').textContent = build.target || '-';
                 document.getElementById('card-platform').textContent = build.platform || '-';
                 document.getElementById('card-mode').textContent = build.mode || build.build_type || '-';
                 document.getElementById('card-created').textContent = formatTime(build.created_at);
@@ -509,6 +514,7 @@
                 if (buildRes.ok) {
                     const build = await buildRes.json();
                     document.getElementById('card-status').innerHTML = statusLabel(build.status);
+                    document.getElementById('card-target').textContent = build.target || '-';
                     document.getElementById('card-finished').textContent = formatTime(build.finished_at) || '-';
                     if (build.status !== 'running' && currentBuild && currentBuild.status === 'running') {
                         loadBuild();
