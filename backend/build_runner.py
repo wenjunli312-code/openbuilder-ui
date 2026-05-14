@@ -204,6 +204,13 @@ def run_build(build_id: str, project: str, mode: str, platform: str, target: str
                 shutil.rmtree(build_dir)
                 update_build(build_id, log="Cleaned build directory\n")
 
+            # Step 2.6: Clean target directory to remove stale artifacts from previous builds
+            target_dir = WORKSPACE_DIR / "target" / platform / mode
+            if target_dir.exists():
+                import shutil
+                shutil.rmtree(target_dir)
+                update_build(build_id, log=f"Cleaned target directory ({platform}/{mode})\n")
+
             # Step 3: Run openbuilder build
             if not target:
                 raise RuntimeError(
