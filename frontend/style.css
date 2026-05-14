@@ -261,11 +261,28 @@ section h2 {
     width: 100%;
 }
 
-.dialog-field select:focus {
+.dialog-field input[type="text"] {
+    padding: 10px 14px;
+    border: 1.5px solid #b3d9ff;
+    border-radius: 8px;
+    font-size: 14px;
+    background: #f8fbff;
+    width: 100%;
+    box-sizing: border-box;
+    color: #333;
+}
+
+
+.dialog-field input[type="text"]::placeholder {
+    color: #999;
+}
+
+.dialog-field input[type="text"]:focus {
     outline: none;
     border-color: #4a9eff;
     box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.15);
 }
+
 
 /* Manifest editor */
 .manifest-field {
