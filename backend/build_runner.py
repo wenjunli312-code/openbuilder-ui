@@ -224,7 +224,7 @@ def run_build(build_id: str, project: str, mode: str, platform: str, target: str
                     f"Available targets: {', '.join(all_names) or 'none'}"
                 )
             update_build(build_id, log=f"Running openbuilder build {target}...\n")
-            build_cmd = [OB_PY, "-c", "from openbuilder.cli import main; main()", "build", target, "--build-type", mode]
+            build_cmd = [OB_PY, "-c", "from openbuilder.cli import main; main()", "build", target, "--build-type", mode, "--recursive"]
             result = subprocess.run(
                 build_cmd,
                 cwd=str(WORKSPACE_DIR),
