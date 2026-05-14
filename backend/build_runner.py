@@ -205,11 +205,19 @@ def run_build(build_id: str, project: str, mode: str, platform: str, target: str
                 update_build(build_id, log="Cleaned build directory\n")
 
             # Step 3: Run openbuilder build
-            update_build(build_id, log=f"Running openbuilder build...\n")
-            build_cmd = [OB_PY, "-c", "from openbuilder.cli import main; main()", "build"]
-            if target:
-                build_cmd.append(target)
-            build_cmd.extend(["--build-type", mode])
+            if not target:
+                raise RuntimeError(
+                    "Target is required. Please select a build target from the manifest "
+                    "(e.g. a repo name or virtual project name) before building."
+                )
+            all_names = [r["name"] for r in manifest_data.get("projects", [])]
+            if target not in all_names:
+                raise RuntimeError(
+                    f"Target '{target}' not found in manifest. "
+                    f"Available targets: {', '.join(all_names) or 'none'}"
+                )
+            update_build(build_id, log=f"Running openbuilder build {target}...\n")
+            build_cmd = [OB_PY, "-c", "from openbuilder.cli import main; main()", "build", target, "--build-type", mode]
             result = subprocess.run(
                 build_cmd,
                 cwd=str(WORKSPACE_DIR),
