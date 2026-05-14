@@ -103,36 +103,44 @@ async function loadManifest() {
     const btn = document.getElementById('btn-load-manifest');
     const textarea = document.getElementById('dialog-manifest');
     const project = document.getElementById('dialog-project').value;
+    const datalist = document.getElementById('target-suggestions');
+    datalist.innerHTML = '';
+    document.getElementById('dialog-target').value = '';
+
     btn.disabled = true;
     btn.textContent = '加载中...';
     textarea.value = '';
+
     try {
         // Load project-specific manifest from config repo
-        const content = await fetchProjectManifest(project);
-        textarea.value = content;
-    } catch (err) {
-        // Fallback: try workspace manifest
+        let content;
         try {
-            const content = await fetchWorkspaceManifest();
-            textarea.value = content || `# 项目 "${project}" 的 manifest 未找到\n# 请手动填写`;
+            content = await fetchProjectManifest(project);
         } catch {
-            textarea.value = `# 加载失败: ${err.message}\n# 请手动填写 manifest 内容`;
-        }
-        // Parse manifest to populate target dropdown
-        const targetSelect = document.getElementById('dialog-target');
-        try {
-            const data = jsyaml.load(textarea.value);
-            const targets = data && data.projects ? data.projects : [];
-            if (targets.length > 0) {
-                targetSelect.innerHTML = targets.map(t =>
-                    `<option value="${t.name}">${t.name}${t.url ? '' : ' (虚拟)'}</option>`
-                ).join('');
-            } else {
-                targetSelect.innerHTML = '<option value="">(无可用目标)</option>';
+            // Fallback: try workspace manifest
+            content = await fetchWorkspaceManifest();
+            if (!content) {
+                textarea.value = `# 项目 "${project}" 的 manifest 未找到\n# 请手动填写`;
+                btn.disabled = false;
+                btn.textContent = '↻ 加载';
+                return;
             }
-        } catch (e) {
-            targetSelect.innerHTML = '<option value="">(manifest 解析失败)</option>';
         }
+        textarea.value = content;
+
+
+        // Parse manifest and populate datalist with project names
+        try {
+            const data = jsyaml.load(content);
+            const targets = data && data.projects ? data.projects : [];
+            datalist.innerHTML = targets.map(t =>
+                `<option value="${t.name}">${t.name}${t.url ? '' : ' (虚拟)'}</option>`
+            ).join('');
+        } catch (e) {
+            // ignore parse errors, datalist stays empty
+        }
+    } catch (err) {
+        textarea.value = `# 加载失败: ${err.message}\n# 请手动填写 manifest 内容`;
     } finally {
         btn.disabled = false;
         btn.textContent = '↻ 加载';

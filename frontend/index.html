@@ -65,10 +65,9 @@
                 </div>
                 <div class="dialog-field">
                     <label for="dialog-target">构建目标</label>
-                    <select id="dialog-target">
-                        <option value="">加载中...</option>
-                    </select>
-                    <p class="manifest-hint">选择要构建的目标项目（包含虚拟节点）</p>
+                    <input type="text" id="dialog-target" list="target-suggestions" placeholder="输入或选择构建目标">
+                    <datalist id="target-suggestions"></datalist>
+                    <p class="manifest-hint">选择要构建的目标项目（包含虚拟节点），可直接输入</p>
                 </div>
                 <div class="dialog-field">
                     <label for="dialog-platform">编译平台</label>
