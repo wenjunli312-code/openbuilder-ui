@@ -9,3 +9,7 @@ backend/downloads/
 .vscode/
 .DS_Store
 *.swp
+
+# Python
+__pycache__/
+*.pyc

@@ -82,10 +82,64 @@ def compare_builds():
             import yaml
             with open(manifest_path) as f:
                 data = yaml.safe_load(f)
-            repos = data.get("repos", [])
+            repos = data.get("repos", []) or data.get("projects", [])
             return [{ "name": r["name"], "url": r.get("url", ""), "revision": r.get("revision", "") } for r in repos]
         except Exception:
             return []
+
+    def get_repo_url(project_name: str, repo_name: str) -> str:
+        """Get the GitHub URL for a repo from the project manifest."""
+        repos = get_project_repos(project_name)
+        for r in repos:
+            if r["name"] == repo_name:
+                return r.get("url", "")
+        return ""
+
+    def build_github_compare_url(repo_url: str, old_commit: str, new_commit: str) -> str:
+        """Build a GitHub compare URL for two commits."""
+        if not repo_url or not old_commit or not new_commit:
+            return ""
+        # Convert git@ or https:// URL to github.com URL
+        # e.g. https://github.com/owner/repo.git -> https://github.com/owner/repo
+        import re
+        m = re.search(r'(?:github\.com[/:])([^/]+)/([^/]+?)(?:\.git)?$', repo_url)
+        if not m:
+            return ""
+        owner, repo = m.group(1), m.group(2)
+        return f"https://github.com/{owner}/{repo}/compare/{old_commit}..{new_commit}"
+
+    def get_commit_diff(repo_name: str, old_commit: str, new_commit: str) -> list:
+        """Get all commits that differ between two commits in a repo."""
+        import subprocess
+        repo_src = WORKSPACE_DIR / "src" / repo_name
+        if not repo_src.exists():
+            return []
+
+        commits = []
+        # Commits in new_commit that are not in old_commit (newer commits)
+        if new_commit and old_commit:
+            res_newer = subprocess.run(
+                ["git", "-C", str(repo_src), "log", "--oneline", f"{old_commit}..{new_commit}"],
+                capture_output=True, text=True
+            )
+            for line in (res_newer.stdout or "").strip().split("\n"):
+                if line.strip():
+                    parts = line.split(" ", 1)
+                    if len(parts) == 2:
+                        commits.append({"hash": parts[0], "message": parts[1], "direction": "newer"})
+
+            # Commits in old_commit that are not in new_commit (reverted/older)
+            res_older = subprocess.run(
+                ["git", "-C", str(repo_src), "log", "--oneline", f"{new_commit}..{old_commit}"],
+                capture_output=True, text=True
+            )
+            for line in (res_older.stdout or "").strip().split("\n"):
+                if line.strip():
+                    parts = line.split(" ", 1)
+                    if len(parts) == 2:
+                        commits.append({"hash": parts[0], "message": parts[1], "direction": "older"})
+
+        return commits
 
     # Prefer repos stored in build record (has commit hashes), fallback to manifest
     left_repos_raw = left.get("repos", []) or get_project_repos(left.get("project", ""))
@@ -104,13 +158,24 @@ def compare_builds():
             lc = left_repos[name].get("commit", "")
             rc = right_repos[name].get("commit", "")
             if lc and rc and lc != rc:
-                repo_comparisons.append({"name": name, "status": "modified", "left_commit": lc, "right_commit": rc})
+                commits_diff = get_commit_diff(name, lc, rc)
+                github_url = build_github_compare_url(
+                    get_repo_url(left.get("project", ""), name), lc, rc
+                )
+                repo_comparisons.append({
+                    "name": name,
+                    "status": "modified",
+                    "left_commit": lc,
+                    "right_commit": rc,
+                    "commits_diff": commits_diff,
+                    "github_compare_url": github_url,
+                })
             else:
-                repo_comparisons.append({"name": name, "status": "unchanged"})
+                repo_comparisons.append({"name": name, "status": "unchanged", "left_commit": lc, "right_commit": rc})
         elif in_left:
-            repo_comparisons.append({"name": name, "status": "left_only"})
+            repo_comparisons.append({"name": name, "status": "left_only", "left_commit": left_repos[name].get("commit", ""), "right_commit": ""})
         else:
-            repo_comparisons.append({"name": name, "status": "right_only"})
+            repo_comparisons.append({"name": name, "status": "right_only", "left_commit": "", "right_commit": right_repos[name].get("commit", "")})
 
     return jsonify({
         "left": {
@@ -213,6 +278,23 @@ def get_build_info(build_id: str):
     return jsonify(build)
 
 
+@app.route("/api/builds/<build_id>/log", methods=["GET"])
+def get_build_log(build_id: str):
+    """Return the last 5000 characters of the build log."""
+    build = get_build(build_id)
+    if not build:
+        return jsonify({"error": "Build not found"}), 404
+
+    log = build.get("log", "")
+    tail = log[-5000:] if len(log) > 5000 else log
+    return jsonify({
+        "build_id": build_id,
+        "status": build.get("status", "unknown"),
+        "log_length": len(log),
+        "log_tail": tail,
+    })
+
+
 @app.route("/api/builds/<build_id>/download", methods=["GET"])
 def download_artifact(build_id: str):
     """Download the artifact for a completed build from S3."""
@@ -256,6 +338,30 @@ def download_artifact(build_id: str):
     if not local_path.exists():
         return jsonify({"error": "Artifact file not found"}), 404
     return send_file(local_path, as_attachment=True, download_name=local_path.name)
+
+
+@app.route("/api/builds/<build_id>/log/download", methods=["GET"])
+def download_build_log(build_id: str):
+    """Download the full build log as a text file."""
+    build = get_build(build_id)
+    if not build:
+        return jsonify({"error": "Build not found"}), 404
+
+    log_content = build.get("log", "")
+    if not log_content:
+        return jsonify({"error": "No log available for this build"}), 404
+
+    # Write to temp file and serve
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.log', delete=False) as f:
+        f.write(log_content)
+        tmp_path = f.name
+
+    return send_file(
+        tmp_path,
+        as_attachment=True,
+        download_name=f"build-{build_id}.log",
+        mimetype="text/plain"
+    )
 
 
 @app.route("/api/builds/<build_id>", methods=["DELETE"])

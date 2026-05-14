@@ -370,13 +370,181 @@ section h2 {
     cursor: not-allowed;
 }
 
-/* Build ID click to copy */
+/* Build ID click to open detail */
 .build-id {
     cursor: pointer;
     user-select: text;
+    color: #1a5fa8;
+    font-weight: 500;
 }
 
 .build-id:hover {
-    color: #1a5fa8;
+    color: #0d3a6e;
     text-decoration: underline;
+}
+
+/* ── Build Detail Dialog ─────────────────────────────────────────────── */
+
+.detail-dialog {
+    width: 960px;
+    max-width: 95vw;
+    max-height: 92vh;
+}
+
+.detail-dialog .dialog-body {
+    padding: 20px 24px;
+    gap: 16px;
+}
+
+.detail-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.detail-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 28px;
+}
+
+.detail-label {
+    width: 90px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    flex-shrink: 0;
+}
+
+.detail-value {
+    font-size: 14px;
+    color: #222;
+    flex: 1;
+}
+
+.detail-value.mono {
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+}
+
+.detail-repos {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.repos-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-left: 90px;
+    max-height: 120px;
+    overflow-y: auto;
+    padding: 4px 0;
+}
+
+.repo-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    background: #f5faff;
+    border-radius: 6px;
+    border: 1px solid #e0efff;
+    font-size: 13px;
+}
+
+.repo-item.empty {
+    background: #fafafa;
+    color: #888;
+    border-style: dashed;
+}
+
+.repo-name {
+    font-weight: 500;
+    color: #1a5fa8;
+}
+
+.repo-commit {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: #555;
+    background: #e8f4ff;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* Log section */
+.log-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+    flex: 1;
+    min-height: 0;
+}
+
+.log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #d0e8ff;
+}
+
+.log-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2a5f9e;
+}
+
+.btn-refresh-log {
+    padding: 4px 12px;
+    background: #e8f4ff;
+    color: #3a7fc4;
+    border: 1.5px solid #b3d9ff;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-refresh-log:hover {
+    background: #d0e8ff;
+}
+
+.log-viewer {
+    flex: 1;
+    min-height: 300px;
+    max-height: 480px;
+    overflow-y: auto;
+    padding: 14px;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    font-family: 'SF Mono', 'Menlo', 'Consolas', 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 8px;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.log-viewer::-webkit-scrollbar {
+    width: 8px;
+}
+
+.log-viewer::-webkit-scrollbar-track {
+    background: #2a2a3e;
+    border-radius: 4px;
+}
+
+.log-viewer::-webkit-scrollbar-thumb {
+    background: #4a4a6e;
+    border-radius: 4px;
+}
+
+.log-viewer::-webkit-scrollbar-thumb:hover {
+    background: #5a5a7e;
 }

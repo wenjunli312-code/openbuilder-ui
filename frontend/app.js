@@ -16,9 +16,11 @@ function closeDialog() {
     document.getElementById('dialog-overlay').classList.remove('active');
 }
 
-
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeDialog();
+    if (e.key === 'Escape') {
+        closeDialog();
+        closeCompareDialog();
+    }
 });
 
 // Compare dialog
@@ -185,13 +187,12 @@ function renderBuildRow(build) {
         ? `<a href="/api/builds/${build.id}/download" class="download-btn" target="_blank">Download</a>`
         : '-';
 
-    // 兼容旧数据格式：build_type -> mode
     const project = build.project || build.project_name || '-';
     const mode = build.mode || build.build_type || '-';
 
     return `
         <tr>
-            <td class="build-id" onclick="copyBuildId('${build.id}')" title="点击复制">${build.id}</td>
+            <td class="build-id" onclick="window.open('build.html?id=${build.id}', '_blank')" title="点击查看详情">${build.id}</td>
             <td class="meta"><span>${project}</span></td>
             <td class="meta"><span>${build.platform || '-'}</span></td>
             <td class="meta"><span>${mode}</span></td>
@@ -212,19 +213,6 @@ function renderBuilds(builds) {
     }
 
     tbody.innerHTML = active.map(renderBuildRow).join('');
-}
-
-
-// ---------------------------------------------------------------------------
-// Copy Build ID
-// ---------------------------------------------------------------------------
-
-function copyBuildId(id) {
-    navigator.clipboard.writeText(id).then(() => {
-        // Brief visual feedback could be added here
-    }).catch(err => {
-        console.error('Failed to copy:', err);
-    });
 }
 
 // ---------------------------------------------------------------------------

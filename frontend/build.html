@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Build Detail - OpenBuilder</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { min-height: 100vh; }
+        .detail-page {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 24px 20px;
+        }
+        .detail-page-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .back-btn {
+            padding: 8px 18px;
+            background: #e8f4ff;
+            color: #3a7fc4;
+            border: 1.5px solid #b3d9ff;
+            border-radius: 8px;
+            font-size: 14px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .back-btn:hover { background: #d0e8ff; }
+        .detail-page-header h1 {
+            font-size: 22px;
+            color: #1a5fa8;
+        }
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+        .info-card {
+            background: white;
+            border-radius: 10px;
+            padding: 16px 20px;
+            box-shadow: 0 2px 8px rgba(100, 150, 220, 0.12);
+            border: 1px solid #e0efff;
+        }
+        .info-card .card-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #7aa8d1;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+        .info-card .card-value {
+            font-size: 15px;
+            color: #222;
+            font-weight: 500;
+            word-break: break-all;
+        }
+        .info-card .card-value.mono {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        .download-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(100, 150, 220, 0.12);
+            border: 1px solid #e0efff;
+        }
+        .download-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .download-section h2 {
+            font-size: 14px;
+            color: #2a5f9e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .download-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e0efff;
+        }
+        .download-info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .download-info-label {
+            font-size: 12px;
+            color: #888;
+            font-weight: 500;
+        }
+        .download-info-value {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #444;
+        }
+        .btn-download {
+            padding: 10px 28px;
+            background: #3a7fc4;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-download:hover { background: #2b6cb0; }
+        .btn-download:active { transform: scale(0.98); }
+        .btn-download svg { width: 16px; height: 16px; }
+        .btn-download.disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .repos-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(100, 150, 220, 0.12);
+        }
+        .repos-section h2 {
+            font-size: 14px;
+            color: #2a5f9e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #d0e8ff;
+        }
+        .repos-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .repos-table th {
+            background: #f0f7ff;
+            color: #2a5f9e;
+            font-weight: 600;
+            text-align: left;
+            padding: 10px 16px;
+            border-bottom: 1.5px solid #b3d9ff;
+        }
+        .repos-table td {
+            padding: 10px 16px;
+            border-bottom: 1px solid #e0efff;
+        }
+        .repos-table tr:last-child td { border-bottom: none; }
+        .repos-table .repo-name {
+            font-weight: 500;
+            color: #1a5fa8;
+        }
+        .repos-table .repo-branch {
+            font-size: 13px;
+            color: #555;
+            background: #f0f7ff;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+        .repos-table .repo-commit {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #555;
+            background: #e8f4ff;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+        .log-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px 24px;
+            box-shadow: 0 2px 8px rgba(100, 150, 220, 0.12);
+        }
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #d0e8ff;
+        }
+        .log-header h2 {
+            font-size: 14px;
+            color: #2a5f9e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .log-meta {
+            font-size: 12px;
+            color: #888;
+        }
+        .log-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .btn-refresh {
+            padding: 5px 14px;
+            background: #e8f4ff;
+            color: #3a7fc4;
+            border: 1.5px solid #b3d9ff;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-refresh:hover { background: #d0e8ff; }
+        .btn-log-download {
+            padding: 5px 14px;
+            background: #f0f7ff;
+            color: #2a5f9e;
+            border: 1.5px solid #b3d9ff;
+            border-radius: 6px;
+            font-size: 13px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-log-download:hover { background: #d0e8ff; }
+        .log-viewer {
+            background: #1a1a2e;
+            color: #e0e0e0;
+            font-family: 'SF Mono', 'Menlo', 'Consolas', 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            padding: 18px;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .log-viewer::-webkit-scrollbar { width: 8px; }
+        .log-viewer::-webkit-scrollbar-track { background: #2a2a3e; border-radius: 4px; }
+        .log-viewer::-webkit-scrollbar-thumb { background: #4a4a6e; border-radius: 4px; }
+        .log-viewer::-webkit-scrollbar-thumb:hover { background: #5a5a7e; }
+        .loading-state { text-align: center; padding: 60px; color: #888; font-size: 15px; }
+        .error-state { text-align: center; padding: 60px; color: #c44; font-size: 15px; }
+        .empty-state { text-align: center; padding: 40px; color: #888; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="detail-page">
+        <div class="detail-page-header">
+            <a href="index.html" class="back-btn">← 返回列表</a>
+            <h1>Build Detail</h1>
+        </div>
+
+        <div class="info-cards" id="info-cards">
+            <div class="info-card">
+                <div class="card-label">Build ID</div>
+                <div class="card-value mono" id="card-id">Loading...</div>
+            </div>
+            <div class="info-card">
+                <div class="card-label">Status</div>
+                <div class="card-value" id="card-status">-</div>
+            </div>
+            <div class="info-card">
+                <div class="card-label">Project</div>
+                <div class="card-value" id="card-project">-</div>
+            </div>
+            <div class="info-card">
+                <div class="card-label">Platform</div>
+                <div class="card-value" id="card-platform">-</div>
+            </div>
+            <div class="info-card">
+                <div class="card-label">Mode</div>
+                <div class="card-value" id="card-mode">-</div>
+            </div>
+            <div class="info-card">
+                <div class="card-label">Created</div>
+                <div class="card-value" id="card-created">-</div>
+            </div>
+            <div class="info-card">
+                <div class="card-label">Finished</div>
+                <div class="card-value" id="card-finished">-</div>
+            </div>
+        </div>
+
+        <div class="download-section" id="download-section">
+            <div class="download-section-header">
+                <h2>编译产物</h2>
+                <a id="btn-download" class="btn-download" style="display:none;" href="#">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    下载 .tar.gz
+                </a>
+                <span id="btn-download-disabled" class="btn-download disabled" style="display:none;">
+                    构建未完成，无法下载
+                </span>
+            </div>
+            <div class="download-info" id="download-info" style="display:none;">
+                <div class="download-info-item">
+                    <span class="download-info-label">文件名</span>
+                    <span class="download-info-value" id="download-filename">-</span>
+                </div>
+                <div class="download-info-item">
+                    <span class="download-info-label">S3 路径</span>
+                    <span class="download-info-value" id="download-s3path">-</span>
+                </div>
+                <div class="download-info-item">
+                    <span class="download-info-label">状态</span>
+                    <span class="download-info-value" id="download-status">-</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="repos-section" id="repos-section">
+            <h2>Repos</h2>
+            <table class="repos-table" id="repos-table">
+                <thead>
+                    <tr>
+                        <th>Repo</th>
+                        <th>Branch</th>
+                        <th>Commit</th>
+                    </tr>
+                </thead>
+                <tbody id="repos-tbody">
+                    <tr><td colspan="3" class="loading-state">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="log-section">
+            <div class="log-header">
+                <div>
+                    <h2>编译日志（最后 5000 字符）</h2>
+                    <div class="log-meta" id="log-meta"></div>
+                </div>
+                <div class="log-actions">
+                    <a id="btn-log-download" class="btn-log-download" style="display:none;" href="#" target="_blank">
+                        📄 下载完整日志
+                    </a>
+                    <button class="btn-refresh" onclick="refreshLog()">↻ 刷新</button>
+                </div>
+            </div>
+            <pre class="log-viewer" id="log-viewer">加载中...</pre>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '';
+        let autoRefreshTimer = null;
+        let currentBuild = null;
+
+        function getBuildId() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('id') || '';
+        }
+
+        function formatTime(isoString) {
+            if (!isoString) return '-';
+            const d = new Date(isoString);
+            const pad = n => String(n).padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ` +
+                   `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+        }
+
+        function statusLabel(status) {
+            const labels = {
+                pending:   'Pending',
+                running:   'Running...',
+                success:   'Success',
+                failed:    'Failed',
+                cancelled: 'Cancelled',
+                deleted:   'Deleted',
+            };
+            return `<span class="status ${status}">${labels[status] || status}</span>`;
+        }
+
+        async function loadBuild() {
+            const buildId = getBuildId();
+            if (!buildId) {
+                document.getElementById('card-id').textContent = 'No build ID in URL (add ?id=...)';
+                return;
+            }
+
+            try {
+                const [buildRes, logRes] = await Promise.all([
+                    fetch(`${API_BASE}/api/builds/${encodeURIComponent(buildId)}`),
+                    fetch(`${API_BASE}/api/builds/${encodeURIComponent(buildId)}/log`),
+                ]);
+
+                if (!buildRes.ok) throw new Error(`Build not found (${buildRes.status})`);
+                const build = await buildRes.json();
+                currentBuild = build;
+                const logData = logRes.ok ? await logRes.json() : { log_tail: '', log_length: 0 };
+
+                document.getElementById('card-id').textContent = build.id;
+                document.getElementById('card-status').innerHTML = statusLabel(build.status);
+                document.getElementById('card-project').textContent = build.project || '-';
+                document.getElementById('card-platform').textContent = build.platform || '-';
+                document.getElementById('card-mode').textContent = build.mode || build.build_type || '-';
+                document.getElementById('card-created').textContent = formatTime(build.created_at);
+                document.getElementById('card-finished').textContent = formatTime(build.finished_at) || '-';
+
+                // Download section
+                const btnDownload = document.getElementById('btn-download');
+                const btnDisabled = document.getElementById('btn-download-disabled');
+                const downloadInfo = document.getElementById('download-info');
+
+                if (build.status === 'success' && build.artifact_path) {
+                    btnDownload.style.display = 'inline-flex';
+                    btnDownload.href = `/api/builds/${encodeURIComponent(buildId)}/download`;
+                    btnDisabled.style.display = 'none';
+                    downloadInfo.style.display = 'flex';
+                    const filename = build.artifact_path.split('/').pop();
+                    document.getElementById('download-filename').textContent = filename;
+                    document.getElementById('download-s3path').textContent = build.artifact_path;
+                    document.getElementById('download-status').textContent = '就绪，可下载';
+                    document.getElementById('download-status').style.color = '#155724';
+                } else {
+                    btnDownload.style.display = 'none';
+                    btnDisabled.style.display = 'inline-flex';
+                    downloadInfo.style.display = 'flex';
+                    document.getElementById('download-filename').textContent = '-';
+                    document.getElementById('download-s3path').textContent = build.artifact_path || '-';
+                    if (build.status === 'running') {
+                        document.getElementById('download-status').textContent = '构建中，完成后可下载';
+                        document.getElementById('download-status').style.color = '#004085';
+                    } else if (build.status === 'failed') {
+                        document.getElementById('download-status').textContent = '构建失败，无产物';
+                        document.getElementById('download-status').style.color = '#721c24';
+                    } else {
+                        document.getElementById('download-status').textContent = build.status;
+                        document.getElementById('download-status').style.color = '#555';
+                    }
+                }
+
+                // Repos table - branch + commit
+                const repos = build.repos || [];
+                const reposTbody = document.getElementById('repos-tbody');
+                if (repos.length === 0) {
+                    reposTbody.innerHTML = '<tr><td colspan="3" class="empty-state">暂无 repo 信息</td></tr>';
+                } else {
+                    reposTbody.innerHTML = repos.map(r => `
+                        <tr>
+                            <td class="repo-name">${escapeHtml(r.name || '?')}</td>
+                            <td><span class="repo-branch">${escapeHtml(r.branch || '-')}</span></td>
+                            <td><span class="repo-commit">${escapeHtml((r.commit || '').slice(0, 40))}</span></td>
+                        </tr>
+                    `).join('');
+                }
+
+                // Log
+                document.getElementById('log-viewer').textContent = logData.log_tail || '(无日志)';
+                document.getElementById('log-meta').textContent = `日志总长度: ${logData.log_length || 0} 字符，显示最后 5000 字符`;
+
+                // Log download button
+                const btnLogDownload = document.getElementById('btn-log-download');
+                if (logData.log_length > 0) {
+                    btnLogDownload.style.display = 'inline-flex';
+                    btnLogDownload.href = `/api/builds/${encodeURIComponent(buildId)}/log/download`;
+                } else {
+                    btnLogDownload.style.display = 'none';
+                }
+
+                // Auto-refresh for running builds
+                if (build.status === 'running') {
+                    autoRefreshTimer = setInterval(refreshLog, 5000);
+                }
+
+            } catch (err) {
+                document.getElementById('card-id').textContent = 'Error: ' + err.message;
+                document.getElementById('log-viewer').textContent = '加载失败: ' + err.message;
+            }
+        }
+
+        async function refreshLog() {
+            const buildId = getBuildId();
+            if (!buildId) return;
+            try {
+                const logRes = await fetch(`${API_BASE}/api/builds/${encodeURIComponent(buildId)}/log`);
+                if (!logRes.ok) return;
+                const logData = await logRes.json();
+
+                const logViewer = document.getElementById('log-viewer');
+                logViewer.textContent = logData.log_tail || '(无日志)';
+                logViewer.scrollTop = logViewer.scrollHeight;
+
+                document.getElementById('log-meta').textContent =
+                    `日志总长度: ${logData.log_length || 0} 字符，显示最后 5000 字符，刷新于 ${new Date().toLocaleTimeString()}`;
+
+                const buildRes = await fetch(`${API_BASE}/api/builds/${encodeURIComponent(buildId)}`);
+                if (buildRes.ok) {
+                    const build = await buildRes.json();
+                    document.getElementById('card-status').innerHTML = statusLabel(build.status);
+                    document.getElementById('card-finished').textContent = formatTime(build.finished_at) || '-';
+                    if (build.status !== 'running' && currentBuild && currentBuild.status === 'running') {
+                        loadBuild();
+                    }
+                    if (build.status !== 'running' && autoRefreshTimer) {
+                        clearInterval(autoRefreshTimer);
+                        autoRefreshTimer = null;
+                    }
+                    currentBuild = build;
+                }
+            } catch (err) {
+                console.error('Refresh failed:', err);
+            }
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        loadBuild();
+    </script>
+</body>
+</html>

@@ -8,6 +8,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
+      - ./backend:/app
       - ./backend/downloads:/app/downloads
       - ./frontend:/frontend
       - ~/workspace/openbuilder-workspace:/Users/kaka/workspace/openbuilder-workspace

@@ -147,6 +147,18 @@ async function runCompare() {
 function renderCompareResult(data, container) {
     const { left, right, summary, repo_comparisons } = data;
 
+    const statusColors = {
+        unchanged:  '#d4edda',
+        modified:   '#fff3cd',
+        left_only:  '#f8d7da',
+        right_only: '#f8d7da',
+    };
+    const statusTextColors = {
+        unchanged:  '#155724',
+        modified:   '#856404',
+        left_only:  '#721c24',
+        right_only: '#721c24',
+    };
     const GREEN = '#d4edda';
     const RED = '#f8d7da';
     const GREEN_TEXT = '#155724';
@@ -189,14 +201,52 @@ function renderCompareResult(data, container) {
         for (const repo of repo_comparisons) {
             const bg = statusColors[repo.status] || '#f0f0f0';
             const fg = statusTextColors[repo.status] || '#333';
-            let detail = repo.status;
             if (repo.status === 'modified') {
-                detail += ` (${(repo.left_commit || '').slice(0, 7)} → ${(repo.right_commit || '').slice(0, 7)})`;
+                const arrow = (repo.left_commit || '').slice(0, 7) + ' → ' + (repo.right_commit || '').slice(0, 7);
+                const ghUrl = repo.github_compare_url || '';
+                const nameHtml = ghUrl
+                    ? `<a href="${ghUrl}" target="_blank" style="color:#1a5fa8;text-decoration:none;font-weight:500;">${repo.name} ↗</a>`
+                    : `<span style="font-weight:500;">${repo.name}</span>`;
+                html += `<div style="margin-top:8px;">
+                    <div style="display:flex;justify-content:space-between;padding:10px 12px;border-radius:6px;background:${bg};color:${fg};">
+                        ${nameHtml}
+                        <span>modified (${arrow})</span>
+                    </div>`;
+                // Show commit diff from local git
+                const commits = repo.commits_diff || [];
+                if (commits.length > 0) {
+                    html += '<div style="margin-left:20px;margin-top:6px;border-left:3px solid #b3d9ff;padding-left:12px;">';
+                    for (const c of commits) {
+                        const dirColor = c.direction === 'newer' ? '#155724' : '#721c24';
+                        const dirLabel = c.direction === 'newer' ? '↑' : '↓';
+                        html += `<div style="display:flex;align-items:baseline;gap:8px;padding:4px 0;font-size:13px;">
+                            <span style="color:${dirColor};font-weight:bold;">${dirLabel}</span>
+                            <span style="font-family:monospace;color:#555;">${c.hash}</span>
+                            <span style="color:#444;">${escapeHtml(c.message)}</span>
+                        </div>`;
+                    }
+                    html += '</div>';
+                }
+                if (ghUrl) {
+                    html += `<div style="margin-left:20px;padding:6px 0;">
+                        <a href="${ghUrl}" target="_blank" style="font-size:13px;color:#3a7fc4;text-decoration:none;">
+                            🔗 在 GitHub 上查看完整对比 →
+                        </a>
+                    </div>`;
+                }
+                html += '</div>';
+            } else {
+                let detail = repo.status;
+                if (repo.status === 'left_only') {
+                    detail += ' (' + (repo.left_commit || '').slice(0, 7) + ')';
+                } else if (repo.status === 'right_only') {
+                    detail += ' (' + (repo.right_commit || '').slice(0, 7) + ')';
+                }
+                html += `<div style="display:flex;justify-content:space-between;padding:10px 12px;margin-top:8px;border-radius:6px;background:${bg};color:${fg};">
+                    <span style="font-weight:500;">${repo.name}</span>
+                    <span>${detail}</span>
+                </div>`;
             }
-            html += `<div style="display:flex;justify-content:space-between;padding:10px 12px;margin-top:8px;border-radius:6px;background:${bg};color:${fg};">
-                <span style="font-weight:500;">${repo.name}</span>
-                <span>${detail}</span>
-            </div>`;
         }
         html += '</div>';
     } else {
@@ -204,6 +254,14 @@ function renderCompareResult(data, container) {
     }
 
     container.innerHTML = html;
+}
+
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
 }
     </script>
 </body>

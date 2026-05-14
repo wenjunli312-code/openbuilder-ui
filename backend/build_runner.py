@@ -90,8 +90,8 @@ def _calc_hash(target_dir):
     return f"sha256:{h.hexdigest()}"
 
 
-def _publish_to_s3(target_dir, build_id):
-    """Package target dir and upload to S3. Returns s3:// URI."""
+def _publish_to_s3(target_dir, build_id, platform="", mode=""):
+    """Package target/{platform}/{mode} dir and upload to S3. Returns s3:// URI."""
     manifest_file = WORKSPACE_DIR / ".openbuilder" / "manifest.yaml"
     if manifest_file.exists():
         import yaml
@@ -100,11 +100,18 @@ def _publish_to_s3(target_dir, build_id):
     else:
         manifest_data = {}
 
-    target_hash = _calc_hash(target_dir)
+    # Granularity: only package target/{platform}/{mode}/ if available
+    package_dir = target_dir
+    if platform and mode:
+        candidate = target_dir / platform / mode
+        if candidate.exists():
+            package_dir = candidate
+
+    target_hash = _calc_hash(package_dir)
 
     tar_buffer = io.BytesIO()
     with tarfile.open(fileobj=tar_buffer, mode="w:gz") as tar:
-        tar.add(target_dir, arcname="target")
+        tar.add(package_dir, arcname="target")
     tar_buffer.seek(0)
 
     info = {
@@ -213,21 +220,28 @@ def run_build(build_id: str, project: str, mode: str, platform: str, manifest: s
                 raise RuntimeError(f"Build did not complete successfully. Output:\n{log}")
             update_build(build_id, log=log)
 
-            # Step 4: Capture commit hashes
-            update_build(build_id, log="Capturing commit hashes...\n")
+            # Step 4: Capture commit hashes + branch names
+            update_build(build_id, log="Capturing commit hashes and branches...\n")
             repos_info = []
             for rname in repo_names:
                 src_dir = WORKSPACE_DIR / "src" / rname
                 commit = ""
+                branch = ""
                 if src_dir.exists():
-                    res = subprocess.run(
+                    res_commit = subprocess.run(
                         ["git", "-C", str(src_dir), "rev-parse", "HEAD"],
                         capture_output=True, text=True
                     )
-                    if res.returncode == 0:
-                        commit = res.stdout.strip()
-                repos_info.append({"name": rname, "commit": commit})
-                update_build(build_id, log=f"  {rname}: {commit[:8] or '(empty)'}\n")
+                    if res_commit.returncode == 0:
+                        commit = res_commit.stdout.strip()
+                    res_branch = subprocess.run(
+                        ["git", "-C", str(src_dir), "rev-parse", "--abbrev-ref", "HEAD"],
+                        capture_output=True, text=True
+                    )
+                    if res_branch.returncode == 0:
+                        branch = res_branch.stdout.strip()
+                repos_info.append({"name": rname, "branch": branch, "commit": commit})
+                update_build(build_id, log=f"  {rname}: {branch} @ {commit[:8] or '(empty)'}\n")
 
             # Step 5: Publish to S3
             update_build(build_id, log=log + "Allocating build ID...\n")
@@ -235,7 +249,7 @@ def run_build(build_id: str, project: str, mode: str, platform: str, manifest: s
             update_build(build_id, log=log + f"Build ID: {build_num}, packaging...\n")
 
             target_dir = WORKSPACE_DIR / "target"
-            artifact_path = _publish_to_s3(target_dir, build_num)
+            artifact_path = _publish_to_s3(target_dir, build_num, platform=platform, mode=mode)
 
             update_build(
                 build_id,
