@@ -548,13 +548,51 @@ section h2 {
     word-break: break-all;
 }
 
-.log-viewer::-webkit-scrollbar {
-    width: 8px;
+.repos-section {
+    margin-bottom: 24px;
 }
 
-.log-viewer::-webkit-scrollbar-track {
-    background: #2a2a3e;
-    border-radius: 4px;
+.repos-section h2 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #c5c5d5;
+    margin: 0 0 12px 0;
+}
+
+.repos-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+
+.repos-table th {
+    text-align: left;
+    padding: 8px 12px;
+    color: #666;
+    font-size: 12px;
+    font-weight: 600;
+    border-bottom: 1.5px solid #e0e0e8;
+}
+
+.repos-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f0f0f5;
+}
+
+.repos-table .repo-name {
+    font-weight: 600;
+    color: #333;
+}
+
+.repos-table .repo-branch {
+    color: #666;
+}
+
+.repos-table .repo-commit.monospace {
+    font-family: 'Courier New', monospace;
+    color: #555;
+    font-size: 13px;
 }
 
 .log-viewer::-webkit-scrollbar-thumb {

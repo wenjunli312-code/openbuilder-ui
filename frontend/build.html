@@ -304,6 +304,22 @@
             </div>
         </div>
 
+        <div class="repos-section" id="repos-section">
+            <h2>依赖的 Repos</h2>
+            <table class="repos-table" id="repos-table">
+                <thead>
+                    <tr>
+                        <th>Repo</th>
+                        <th>Branch</th>
+                        <th>Commit</th>
+                    </tr>
+                </thead>
+                <tbody id="repos-tbody">
+                    <tr><td colspan="3" class="loading">-</td></tr>
+                </tbody>
+            </table>
+        </div>
+
         <div class="download-section" id="download-section">
             <div class="download-section-header">
                 <h2>编译产物</h2>
@@ -422,6 +438,20 @@
                 document.getElementById('card-mode').textContent = build.mode || build.build_type || '-';
                 document.getElementById('card-created').textContent = formatTime(build.created_at);
                 document.getElementById('card-finished').textContent = formatTime(build.finished_at) || '-';
+
+                // Repos table
+                const tbody = document.getElementById('repos-tbody');
+                if (build.repos && build.repos.length > 0) {
+                    tbody.innerHTML = build.repos.map(r => `
+                        <tr>
+                            <td class="repo-name">${r.name}</td>
+                            <td class="repo-branch">${r.branch || '-'}</td>
+                            <td class="repo-commit monospace">${r.commit ? r.commit.substring(0, 8) : '-'}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="3" class="empty">暂无 Repo 信息</td></tr>';
+                }
 
                 // Download section
                 const btnDownload = document.getElementById('btn-download');
