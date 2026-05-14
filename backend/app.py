@@ -253,6 +253,7 @@ def create_new_build():
     project  = data.get("project", "demo")
     mode     = data.get("mode", "release")
     platform = data.get("platform", "linux-x86_64")
+    target   = data.get("target", "")
     manifest = data.get("manifest", "")
 
     # Validate platform
@@ -264,7 +265,7 @@ def create_new_build():
     build = create_build(project=project, mode=mode, platform=platform)
 
     # Start build in background (uses fixed workspace at ~/workspace/openbuilder-workspace)
-    run_build(build["id"], project, mode, platform, manifest)
+    run_build(build["id"], project, mode, platform, target, manifest)
 
     return jsonify({"id": build["id"], "status": build["status"]}), 201
 

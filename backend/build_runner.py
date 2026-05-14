@@ -132,14 +132,14 @@ def _publish_to_s3(target_dir, build_id, platform="", mode=""):
     return f"s3://{_S3_BUCKET}/{tar_key}"
 
 
-def run_build(build_id: str, project: str, mode: str, platform: str, manifest: str) -> None:
+def run_build(build_id: str, project: str, mode: str, platform: str, target: str, manifest: str) -> None:
     """
     Execute openbuilder build + publish in a background thread.
     Writes the user-provided manifest to the workspace, then runs openbuilder build.
     """
     def _run():
         update_build(build_id, status="running",
-                     log=f"Starting build (project={project}, mode={mode}, platform={platform})...\n")
+                     log=f"Starting build (project={project}, mode={mode}, platform={platform}, target={target})...\n")
 
         try:
             import subprocess
@@ -206,8 +206,12 @@ def run_build(build_id: str, project: str, mode: str, platform: str, manifest: s
 
             # Step 3: Run openbuilder build
             update_build(build_id, log=f"Running openbuilder build...\n")
+            build_cmd = [OB_PY, "-c", "from openbuilder.cli import main; main()", "build"]
+            if target:
+                build_cmd.append(target)
+            build_cmd.extend(["--build-type", mode])
             result = subprocess.run(
-                [OB_PY, "-c", "from openbuilder.cli import main; main()", "build", "--build-type", mode],
+                build_cmd,
                 cwd=str(WORKSPACE_DIR),
                 capture_output=True,
                 text=True,

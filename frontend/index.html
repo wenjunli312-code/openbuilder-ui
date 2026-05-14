@@ -64,6 +64,13 @@
                     </select>
                 </div>
                 <div class="dialog-field">
+                    <label for="dialog-target">构建目标</label>
+                    <select id="dialog-target">
+                        <option value="">加载中...</option>
+                    </select>
+                    <p class="manifest-hint">选择要构建的目标项目（包含虚拟节点）</p>
+                </div>
+                <div class="dialog-field">
                     <label for="dialog-platform">编译平台</label>
                     <select id="dialog-platform">
                         <option value="linux-x86_64">linux-x86_64</option>
@@ -164,6 +171,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

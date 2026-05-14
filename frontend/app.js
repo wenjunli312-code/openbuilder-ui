@@ -56,11 +56,11 @@ async function fetchBuilds() {
     return res.json();
 }
 
-async function createBuild(project, mode, platform, manifest) {
+async function createBuild(project, mode, platform, target, manifest) {
     const res = await fetch(`${API_BASE}/api/builds`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ project, mode, platform, manifest }),
+        body: JSON.stringify({ project, mode, platform, target, manifest }),
     });
     if (!res.ok) throw new Error('Failed to create build');
     return res.json();
@@ -118,6 +118,21 @@ async function loadManifest() {
         } catch {
             textarea.value = `# 加载失败: ${err.message}\n# 请手动填写 manifest 内容`;
         }
+        // Parse manifest to populate target dropdown
+        const targetSelect = document.getElementById('dialog-target');
+        try {
+            const data = jsyaml.load(textarea.value);
+            const targets = data && data.projects ? data.projects : [];
+            if (targets.length > 0) {
+                targetSelect.innerHTML = targets.map(t =>
+                    `<option value="${t.name}">${t.name}${t.url ? '' : ' (虚拟)'}</option>`
+                ).join('');
+            } else {
+                targetSelect.innerHTML = '<option value="">(无可用目标)</option>';
+            }
+        } catch (e) {
+            targetSelect.innerHTML = '<option value="">(manifest 解析失败)</option>';
+        }
     } finally {
         btn.disabled = false;
         btn.textContent = '↻ 加载';
@@ -128,6 +143,7 @@ async function confirmBuild() {
     const project  = document.getElementById('dialog-project').value;
     const mode     = document.getElementById('dialog-mode').value;
     const platform = document.getElementById('dialog-platform').value;
+    const target   = document.getElementById('dialog-target').value;
     const manifest = document.getElementById('dialog-manifest').value;
 
     const btn = document.getElementById('dialog-confirm');
@@ -135,7 +151,7 @@ async function confirmBuild() {
     btn.textContent = '构建中...';
 
     try {
-        await createBuild(project, mode, platform, manifest);
+        await createBuild(project, mode, platform, target, manifest);
         closeDialog();
         await loadBuilds();
     } catch (err) {
