@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenBuilder Web UI - 产品介绍</title>
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --card: #1a2234;
+    --border: #2a3850;
+    --accent: #3b82f6;
+    --accent2: #60a5fa;
+    --accent-glow: rgba(59,130,246,0.25);
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --green: #34d399;
+    --amber: #fbbf24;
+    --red: #f87171;
+    --code-bg: #0d1117;
+    --code-border: #30363d;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    height: 60px;
+    background: rgba(10,14,26,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  nav .logo {
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    letter-spacing: -0.5px;
+  }
+  nav .logo span { color: var(--accent); }
+  nav .nav-links { display: flex; gap: 28px; list-style: none; }
+  nav .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.2s;
+  }
+  nav .nav-links a:hover { color: var(--text); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 100px 24px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -200px; left: 50%;
+    transform: translateX(-50%);
+    width: 800px; height: 800px;
+    background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    background: rgba(59,130,246,0.12);
+    border: 1px solid rgba(59,130,246,0.3);
+    border-radius: 100px;
+    font-size: 13px;
+    color: var(--accent2);
+    margin-bottom: 28px;
+  }
+  .hero-badge .dot {
+    width: 6px; height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .hero h1 {
+    font-size: clamp(40px, 7vw, 72px);
+    font-weight: 800;
+    letter-spacing: -2px;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #fff 0%, #93c5fd 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero p {
+    font-size: clamp(16px, 2vw, 20px);
+    color: var(--muted);
+    max-width: 600px;
+    margin-bottom: 48px;
+  }
+  .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .btn-primary {
+    padding: 12px 32px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    box-shadow: 0 0 30px var(--accent-glow);
+  }
+  .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+  .btn-secondary {
+    padding: 12px 32px;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent2); }
+  .hero-stats {
+    display: flex;
+    gap: 60px;
+    margin-top: 80px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .hero-stat .num {
+    font-size: 32px;
+    font-weight: 800;
+    color: white;
+    display: block;
+  }
+  .hero-stat .label { font-size: 13px; color: var(--muted); }
+
+  /* ── SECTION ── */
+  section { padding: 100px 40px; max-width: 1200px; margin: 0 auto; }
+  .section-tag {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .section-title {
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+    color: white;
+  }
+  .section-desc {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 560px;
+    margin-bottom: 60px;
+  }
+
+  /* ── ARCHITECTURE ── */
+  .arch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .arch-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    transition: all 0.3s;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+  }
+  .arch-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .arch-card:hover { border-color: rgba(59,130,246,0.4); transform: translateY(-3px); }
+  .arch-card:hover::before { opacity: 1; }
+  .arch-card .icon {
+    width: 48px; height: 48px;
+    background: rgba(59,130,246,0.12);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 16px;
+  }
+  .arch-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: white; }
+  .arch-card p { font-size: 14px; color: var(--muted); }
+
+  /* ── FLOW DIAGRAM ── */
+  .flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    flex-wrap: wrap;
+    margin: 40px 0;
+    position: relative;
+  }
+  .flow-step {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 24px;
+    text-align: center;
+    min-width: 160px;
+    flex: 1;
+    transition: all 0.3s;
+  }
+  .flow-step:hover { border-color: rgba(59,130,246,0.5); transform: translateY(-2px); }
+  .flow-step .step-num {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .flow-step .step-icon { font-size: 28px; margin-bottom: 10px; }
+  .flow-step h4 { font-size: 14px; font-weight: 600; margin-bottom: 6px; color: white; }
+  .flow-step p { font-size: 12px; color: var(--muted); }
+  .flow-arrow {
+    font-size: 24px;
+    color: var(--border);
+    padding: 0 4px;
+    flex-shrink: 0;
+  }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 16px 0;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 18px;
+    background: #161b22;
+    border-bottom: 1px solid var(--code-border);
+    font-size: 13px;
+  }
+  .code-dots { display: flex; gap: 6px; }
+  .code-dots span { width: 12px; height: 12px; border-radius: 50%; }
+  .code-dots span:nth-child(1) { background: #ff5f57; }
+  .code-dots span:nth-child(2) { background: #febc2e; }
+  .code-dots span:nth-child(3) { background: #28c840; }
+  .code-title { color: var(--muted); margin-left: 8px; }
+  .code-body {
+    padding: 20px;
+    font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    overflow-x: auto;
+    color: #c9d1d9;
+  }
+  .code-body .k { color: #ff7b72; }
+  .code-body .s { color: #a5d6ff; }
+  .code-body .c { color: #8b949e; }
+  .code-body .v { color: #79c0ff; }
+  .code-body .n { color: #7ee787; }
+
+  /* ── TABS ── */
+  .tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .tab-btn {
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: -1px;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent2); border-bottom-color: var(--accent); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── UI MOCKUP ── */
+  .mockup-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  .mockup-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: #1e2538;
+    border-bottom: 1px solid var(--border);
+  }
+  .mockup-bar span { width: 10px; height: 10px; border-radius: 50%; }
+  .mockup-bar span:nth-child(1) { background: #ff5f57; }
+  .mockup-bar span:nth-child(2) { background: #febc2e; }
+  .mockup-bar span:nth-child(3) { background: #28c840; }
+  .mockup-bar .url {
+    margin-left: 12px;
+    padding: 4px 12px;
+    background: var(--code-bg);
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--muted);
+    font-family: monospace;
+  }
+
+  /* ── MOCKUP INTERNAL STYLES ── */
+  .mock-body { padding: 24px; }
+  .mock-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .mock-header h2 { font-size: 20px; font-weight: 700; color: white; }
+  .mock-header-actions { display: flex; gap: 8px; }
+  .mock-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+  .mock-btn-blue { background: var(--accent); color: white; }
+  .mock-btn-blue:hover { background: #2563eb; }
+  .mock-btn-outline { background: transparent; color: var(--accent2); border: 1px solid var(--border); }
+  .mock-btn-outline:hover { border-color: var(--accent); }
+  .mock-form {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .mock-select, .mock-input {
+    padding: 7px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 13px;
+  }
+  .mock-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .mock-table th {
+    text-align: left;
+    padding: 10px 14px;
+    background: rgba(59,130,246,0.08);
+    color: var(--accent2);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .mock-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(42,56,80,0.5);
+    color: #c9d1d9;
+  }
+  .mock-table tr:last-child td { border-bottom: none; }
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .status-success { background: rgba(52,211,153,0.15); color: var(--green); }
+  .status-running { background: rgba(251,191,36,0.15); color: var(--amber); }
+  .status-running .spinner {
+    width: 10px; height: 10px;
+    border: 2px solid rgba(251,191,36,0.3);
+    border-top-color: var(--amber);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .status-failed { background: rgba(248,113,113,0.15); color: var(--red); }
+
+  /* ── FEATURE CARDS ── */
+  .feat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+  }
+  .feat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+  }
+  .feat-card .feat-icon {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 14px;
+  }
+  .feat-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: white; }
+  .feat-card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .feat-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .feat-tag-blue { background: rgba(59,130,246,0.15); color: var(--accent2); }
+  .feat-tag-green { background: rgba(52,211,153,0.15); color: var(--green); }
+  .feat-tag-amber { background: rgba(251,191,36,0.15); color: var(--amber); }
+
+  /* ── COMPARE MOCKUP ── */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  .compare-table th {
+    background: rgba(59,130,246,0.08);
+    color: var(--accent2);
+    font-weight: 600;
+    text-align: center;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    font-size: 12px;
+    text-transform: uppercase;
+  }
+  .compare-table td {
+    padding: 10px 14px;
+    border: 1px solid rgba(42,56,80,0.6);
+    text-align: center;
+  }
+  .compare-table .check { color: var(--green); font-size: 18px; }
+  .compare-table .cross { color: var(--red); font-size: 18px; }
+  .compare-table .same { background: rgba(52,211,153,0.06); }
+  .compare-table .diff { background: rgba(251,191,36,0.06); }
+
+  /* ── PLATFORM BADGE ── */
+  .platform-grid {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 20px 0;
+  }
+  .platform-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .platform-badge:hover { border-color: var(--accent); }
+  .platform-badge .chip {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+  }
+
+  /* ── DOCKER ARCH ── */
+  .docker-visual {
+    display: flex;
+    align-items: stretch;
+    gap: 16px;
+    margin: 32px 0;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .docker-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 24px;
+    min-width: 200px;
+    text-align: center;
+    position: relative;
+  }
+  .docker-box.top-box { border-color: rgba(59,130,246,0.4); }
+  .docker-box.bottom-box { background: rgba(59,130,246,0.04); }
+  .docker-box h4 { font-size: 14px; font-weight: 600; color: white; margin-bottom: 6px; }
+  .docker-box p { font-size: 12px; color: var(--muted); }
+  .docker-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 40px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up { animation: fadeUp 0.7s ease both; }
+  .delay-1 { animation-delay: 0.1s; }
+  .delay-2 { animation-delay: 0.2s; }
+  .delay-3 { animation-delay: 0.3s; }
+  .delay-4 { animation-delay: 0.4s; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    section { padding: 60px 20px; }
+    nav { padding: 0 20px; }
+    .hero-stats { gap: 30px; }
+    .flow-arrow { display: none; }
+    .flow-step { min-width: 140px; }
+    .tabs { gap: 2px; }
+  }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">🔨 Open<span>Builder</span> Web UI</div>
+  <ul class="nav-links">
+    <li><a href="#architecture">架构</a></li>
+    <li><a href="#frontend">前端</a></li>
+    <li><a href="#backend">后端</a></li>
+    <li><a href="#compare">Build 对比</a></li>
+    <li><a href="#quickstart">快速上手</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge fade-up">
+    <span class="dot"></span>
+    跨平台编译 · Web 管理 · S3 存储
+  </div>
+  <h1 class="fade-up delay-1">OpenBuilder<br>Web UI</h1>
+  <p class="fade-up delay-2">网页发起嵌入式跨平台编译，随时查看构建状态，<br>对比两次构建的差异，下载编译产物 — 全程在浏览器里完成。</p>
+  <div class="hero-actions fade-up delay-3">
+    <a href="#quickstart" class="btn-primary">快速上手 →</a>
+    <a href="#architecture" class="btn-secondary">了解架构</a>
+  </div>
+  <div class="hero-stats fade-up delay-4">
+    <div class="hero-stat">
+      <span class="num">3</span>
+      <span class="label">支持平台</span>
+    </div>
+    <div class="hero-stat">
+      <span class="num">1</span>
+      <span class="label">API 服务</span>
+    </div>
+    <div class="hero-stat">
+      <span class="num">S3</span>
+      <span class="label">产物存储</span>
+    </div>
+    <div class="hero-stat">
+      <span class="num">Docker</span>
+      <span class="label">隔离编译</span>
+    </div>
+  </div>
+</div>
+
+<!-- ARCHITECTURE -->
+<section id="architecture">
+  <div class="section-tag">Architecture</div>
+  <h2 class="section-title">三层架构，职责清晰</h2>
+  <p class="section-desc">Backend 只做 API + 调度，编译由 openbuilder CLI 通过 Docker 调用专用交叉编译镜像完成，产物上传 S3 持久化存储。</p>
+
+  <div class="docker-visual">
+    <div class="docker-box top-box" style="flex:2; min-width:300px;">
+      <div class="docker-label">Frontend</div>
+      <h4>单页 HTML + Vanilla JS</h4>
+      <p>零框架，响应式布局，可直接在浏览器或 WebView 中运行</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px;flex:2;min-width:300px;">
+      <div class="docker-box top-box">
+        <div class="docker-label">Backend</div>
+        <h4>Flask API (Python)</h4>
+        <p>接收请求，调度 openbuilder CLI，写入 builds.json 状态</p>
+      </div>
+      <div class="docker-box bottom-box">
+        <div class="docker-label">Build Runner</div>
+        <h4>openbuilder CLI + Docker</h4>
+        <p>通过 Docker 启动 dockcross 编译镜像，跨平台交叉编译</p>
+      </div>
+    </div>
+    <div class="docker-box top-box">
+      <div class="docker-label">Storage</div>
+      <h4>MinIO (S3 兼容)</h4>
+      <p>编译产物 target.tar.gz + 构建元信息 JSON</p>
+    </div>
+  </div>
+
+  <div class="arch-grid" style="margin-top:40px;">
+    <div class="arch-card reveal">
+      <div class="icon">🌐</div>
+      <h3>Flask REST API</h3>
+      <p>完整的 REST 接口：POST /api/builds 发起构建，GET /api/builds 获取列表，支持构建日志流式读取和产物下载。</p>
+    </div>
+    <div class="arch-card reveal">
+      <div class="icon">🐳</div>
+      <h3>Docker 隔离编译</h3>
+      <p>Backend 容器只运行 Flask，不装编译工具。编译通过 Docker Socket 启动 dockcross 镜像（arm64/armv7/x64），用完即销毁。</p>
+    </div>
+    <div class="arch-card reveal">
+      <div class="icon">☁️</div>
+      <h3>S3 产物持久化</h3>
+      <p>编译产物按 platform/mode 打包上传 S3，以 build ID 为 key，支持 30 天留存和任意回溯下载。</p>
+    </div>
+    <div class="arch-card reveal">
+      <div class="icon">🔄</div>
+      <h3>Build 比较引擎</h3>
+      <p>比较两次构建的 project / platform / mode / mode 是否相同，列出 repo 级别的 commit 差异和 GitHub 对比链接。</p>
+    </div>
+  </div>
+</section>
+
+<!-- BUILD FLOW -->
+<section id="flow" style="padding-top:0;">
+  <div class="section-tag">Build Flow</div>
+  <h2 class="section-title">从发起构建到下载产物</h2>
+  <p class="section-desc">整个构建链路全自动化，每一步都在日志里可见。</p>
+
+  <div class="flow">
+    <div class="flow-step">
+      <div class="step-num">Step 1</div>
+      <div class="step-icon">📝</div>
+      <h4>编辑 Manifest</h4>
+      <p>在 Web 编辑器里填写或修改 manifest.yaml</p>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="step-num">Step 2</div>
+      <div class="step-icon">🚀</div>
+      <h4>发起构建</h4>
+      <p>POST /api/builds，选 platform + mode + target</p>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="step-num">Step 3</div>
+      <div class="step-icon">📦</div>
+      <h4>Clone + Build</h4>
+      <p>Backend 调度 openbuilder CLI，Docker 跑交叉编译</p>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="step-num">Step 4</div>
+      <div class="step-icon">☁️</div>
+      <h4>Publish to S3</h4>
+      <p>打包 target.tar.gz，上传 MinIO，记录 artifact_path</p>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="step-num">Step 5</div>
+      <div class="step-icon">📥</div>
+      <h4>下载产物</h4>
+      <p>GET /api/builds/:id/download，直接下载 .tar.gz</p>
+    </div>
+  </div>
+</section>
+
+<!-- FRONTEND -->
+<section id="frontend">
+  <div class="section-tag">Frontend</div>
+  <h2 class="section-title">三个页面，覆盖全流程</h2>
+  <p class="section-desc">纯 HTML + Vanilla JS，零框架依赖，单文件部署。</p>
+
+  <!-- Dashboard Mockup -->
+  <div class="mockup-wrap reveal" style="margin-bottom:32px;">
+    <div class="mockup-bar">
+      <span></span><span></span><span></span>
+      <span class="url">localhost:8080/index.html</span>
+    </div>
+    <div class="mock-body">
+      <div class="mock-header">
+        <h2>🔨 OpenBuilder Dashboard</h2>
+        <div class="mock-header-actions">
+          <button class="mock-btn mock-btn-blue">+ 发起新构建</button>
+          <button class="mock-btn mock-btn-outline">🔍 比较</button>
+        </div>
+      </div>
+      <div class="mock-form">
+        <select class="mock-select">
+          <option>linux-arm64</option>
+          <option>linux-armv7</option>
+          <option>linux-x86_64</option>
+        </select>
+        <select class="mock-select">
+          <option>release</option>
+          <option>debug</option>
+        </select>
+      </div>
+      <table class="mock-table">
+        <thead>
+          <tr>
+            <th>Build ID</th><th>Platform</th><th>Mode</th><th>Status</th><th>Time</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-family:monospace;font-size:12px;">20260515_101200</td>
+            <td>linux-arm64</td>
+            <td>release</td>
+            <td><span class="status-badge status-success">✅ Success</span></td>
+            <td>02m 34s</td>
+            <td><button class="mock-btn mock-btn-outline" style="padding:4px 10px;font-size:12px;">详情</button></td>
+          </tr>
+          <tr>
+            <td style="font-family:monospace;font-size:12px;">20260515_095830</td>
+            <td>linux-arm64</td>
+            <td>debug</td>
+            <td><span class="status-badge status-running"><span class="spinner"></span> Running</span></td>
+            <td>—</td>
+            <td><button class="mock-btn mock-btn-outline" style="padding:4px 10px;font-size:12px;">详情</button></td>
+          </tr>
+          <tr>
+            <td style="font-family:monospace;font-size:12px;">20260514_182100</td>
+            <td>linux-x86_64</td>
+            <td>release</td>
+            <td><span class="status-badge status-failed">❌ Failed</span></td>
+            <td>01m 12s</td>
+            <td><button class="mock-btn mock-btn-outline" style="padding:4px 10px;font-size:12px;">详情</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="arch-grid">
+    <div class="arch-card reveal">
+      <div class="icon">🏠</div>
+      <h3>index.html — 构建列表</h3>
+      <p>展示所有构建历史，支持按 platform / mode 筛选，发起新构建对话框含 manifest 编辑器，发起后自动轮询状态。</p>
+    </div>
+    <div class="arch-card reveal">
+      <div class="icon">🔍</div>
+      <h3>build.html — 构建详情</h3>
+      <p>每个 Build 的专属页面，显示所有元信息、Repo 列表、编译日志（支持滚动刷新），构建中自动每 5 秒刷新。</p>
+    </div>
+    <div class="arch-card reveal">
+      <div class="icon">⚖️</div>
+      <h3>compare.html — 构建对比</h3>
+      <p>输入两个 Build ID，横向对比 platform / mode / mode，展示 Repo 级别的 commit diff 和 GitHub 对比链接。</p>
+    </div>
+  </div>
+</section>
+
+<!-- BACKEND -->
+<section id="backend">
+  <div class="section-tag">Backend API</div>
+  <h2 class="section-title">Flask REST 接口</h2>
+  <p class="section-desc">所有交互通过 HTTP API 完成，Backend 只负责任务调度和数据存储。</p>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this, 'tab1')">POST /api/builds</button>
+    <button class="tab-btn" onclick="switchTab(this, 'tab2')">GET /api/builds</button>
+    <button class="tab-btn" onclick="switchTab(this, 'tab3')">GET /api/builds/compare</button>
+    <button class="tab-btn" onclick="switchTab(this, 'tab4')">GET /api/builds/:id/download</button>
+  </div>
+
+  <div id="tab1" class="tab-panel active">
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-title">发起一次新的跨平台编译</span>
+      </div>
+      <div class="code-body"><span class="k">POST</span> <span class="s">/api/builds</span>
+{
+  <span class="c">"project"</span>:  <span class="s">"perception-core"</span>,
+  <span class="c">"platform"</span>: <span class="s">"linux-arm64"</span>,
+  <span class="c">"mode"</span>:    <span class="s">"release"</span>,
+  <span class="c">"target"</span>:   <span class="s">"perception-core"</span>,
+  <span class="c">"manifest"</span>: <span class="s">"#manifest.yaml 内容..."</span>
+}
+
+<span class="c"># Response</span>
+{
+  <span class="c">"id"</span>:     <span class="s">"20260515_102400"</span>,
+  <span class="c">"status"</span>: <span class="s">"pending"</span>
+}</div>
+    </div>
+  </div>
+
+  <div id="tab2" class="tab-panel">
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-title">获取所有构建列表</span>
+      </div>
+      <div class="code-body"><span class="k">GET</span> <span class="s">/api/builds</span>
+
+<span class="c"># Response</span>
+{
+  <span class="c">"builds"</span>: [
+    {
+      <span class="c">"id"</span>:         <span class="s">"20260515_101200"</span>,
+      <span class="c">"project"</span>:   <span class="s">"perception-core"</span>,
+      <span class="c">"platform"</span>:  <span class="s">"linux-arm64"</span>,
+      <span class="c">"mode"</span>:      <span class="s">"release"</span>,
+      <span class="c">"status"</span>:    <span class="s">"success"</span>,
+      <span class="c">"created_at"</span>: <span class="s">"2026-05-15T10:12:00"</span>,
+      <span class="c">"repos"</span>: [
+        { <span class="c">"name"</span>: <span class="s">"sensor-abstraction"</span>, <span class="c">"branch"</span>: <span class="s">"main"</span>, <span class="c">"commit"</span>: <span class="s">"7450c85"</span> },
+        { <span class="c">"name"</span>: <span class="s">"vehicle-bridge"</span>, <span class="c">"branch"</span>: <span class="s">"develop"</span>, <span class="c">"commit"</span>: <span class="s">"ac2c3f5"</span> }
+      ]
+    }
+  ]
+}</div>
+    </div>
+  </div>
+
+  <div id="tab3" class="tab-panel">
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-title">比较两个构建的差异</span>
+      </div>
+      <div class="code-body"><span class="k">GET</span> <span class="s">/api/builds/compare?left=20260515_101200&right=20260514_093000</span>
+
+<span class="c"># Response — repo_comparisons 数组</span>
+[
+  {
+    <span class="c">"name"</span>:  <span class="s">"sensor-abstraction"</span>,
+    <span class="c">"status"</span>: <span class="s">"modified"</span>,
+    <span class="c">"left_commit"</span>:  <span class="s">"7450c85"</span>,
+    <span class="c">"right_commit"</span>: <span class="s">"6a1b3c9"</span>,
+    <span class="c">"commits_diff"</span>: [
+      { <span class="c">"hash"</span>: <span class="s">"6a1b3c9"</span>, <span class="c">"message"</span>: <span class="s">"fix: resolve race condition"</span>, <span class="c">"direction"</span>: <span class="s">"newer"</span> },
+      { <span class="c">"hash"</span>: <span class="s">"52f8d11"</span>, <span class="c">"message"</span>: <span class="s">"feat: add lidar filter"</span>, <span class="c">"direction"</span>: <span class="s">"newer"</span> }
+    ],
+    <span class="c">"github_compare_url"</span>: <span class="s">"https://github.com/.../compare/7450c85..6a1b3c9"</span>
+  }
+]</div>
+    </div>
+  </div>
+
+  <div id="tab4" class="tab-panel">
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-title">下载编译产物</span>
+      </div>
+      <div class="code-body"><span class="k">GET</span> <span class="s">/api/builds/{build_id}/download</span>
+
+<span class="c"># 仅在 status == "success" 时可用</span>
+<span class="c"># Backend 从 S3 下载产物，以 attachment 形式返回 .tar.gz 文件</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARE -->
+<section id="compare" style="padding-top:0;">
+  <div class="section-tag">Build Compare</div>
+  <h2 class="section-title">Repo 级差异一目了然</h2>
+  <p class="section-desc">比较两次构建时，不仅告诉你哪些 Repo 变了，还列出 commit 历史和 GitHub 对比链接。</p>
+
+  <div class="mockup-wrap reveal">
+    <div class="mockup-bar">
+      <span></span><span></span><span></span>
+      <span class="url">localhost:8080/compare.html</span>
+    </div>
+    <div class="mock-body">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>对比维度</th>
+            <th>Build A<br><span style="font-size:11px;font-weight:400;color:var(--muted)">20260515_101200</span></th>
+            <th>Build B<br><span style="font-size:11px;font-weight:400;color:var(--muted)">20260514_093000</span></th>
+            <th>结果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="same">
+            <td>Project</td>
+            <td style="font-family:monospace;">perception-core</td>
+            <td style="font-family:monospace;">perception-core</td>
+            <td><span class="check">✓</span></td>
+          </tr>
+          <tr class="same">
+            <td>Platform</td>
+            <td style="font-family:monospace;">linux-arm64</td>
+            <td style="font-family:monospace;">linux-arm64</td>
+            <td><span class="check">✓</span></td>
+          </tr>
+          <tr class="diff">
+            <td>Mode</td>
+            <td style="font-family:monospace;">release</td>
+            <td style="font-family:monospace;">debug</td>
+            <td><span class="cross">✗</span></td>
+          </tr>
+          <tr class="diff">
+            <td>sensor-abstraction</td>
+            <td><span style="font-family:monospace;color:var(--green);">7450c85</span></td>
+            <td><span style="font-family:monospace;color:var(--amber);">6a1b3c9</span></td>
+            <td><span class="cross">✗</span></td>
+          </tr>
+          <tr class="same">
+            <td>vehicle-bridge</td>
+            <td><span style="font-family:monospace;color:var(--green);">ac2c3f5</span></td>
+            <td><span style="font-family:monospace;color:var(--green);">ac2c3f5</span></td>
+            <td><span class="check">✓</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top:16px; padding:14px; background:rgba(251,191,36,0.06); border:1px solid rgba(251,191,36,0.2); border-radius:10px;">
+        <div style="font-size:13px;font-weight:600;color:var(--amber);margin-bottom:8px;">📂 sensor-abstraction — modified</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">
+          <span style="color:var(--green);">↑ 6a1b3c9</span> &nbsp; fix: resolve race condition<br>
+          <span style="color:var(--green);">↑ 52f8d11</span> &nbsp; feat: add lidar filter
+        </div>
+        <a href="#" style="font-size:12px;color:var(--accent2);text-decoration:none;">🔗 在 GitHub 上查看完整对比 →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLATFORM -->
+<section id="platforms" style="padding-top:0;">
+  <div class="section-tag">Cross-Platform</div>
+  <h2 class="section-title">一次配置，三大平台</h2>
+  <p class="section-desc">同一个 manifest，同一份源码，通过选择不同 platform 完成 ARM64 / ARMv7 / x86_64 的交叉编译。</p>
+
+  <div class="platform-grid">
+    <div class="platform-badge">
+      <div class="chip" style="background:#3b82f6;"></div>
+      linux-arm64 — ARM 64-bit（嵌入式主流量产平台）
+    </div>
+    <div class="platform-badge">
+      <div class="chip" style="background:#34d399;"></div>
+      linux-armv7 — ARM 32-bit（成本敏感型设备）
+    </div>
+    <div class="platform-badge">
+      <div class="chip" style="background:#fbbf24;"></div>
+      linux-x86_64 — x86 桌面开发/测试
+    </div>
+  </div>
+
+  <div class="feat-grid" style="margin-top:32px;">
+    <div class="feat-card">
+      <span class="feat-tag feat-tag-blue">Docker</span>
+      <h3>dockcross 交叉编译镜像</h3>
+      <p>Backend 不装编译器，通过 Docker Socket 启动 dockcross 容器执行交叉编译。镜像内含完整的 gcc / cmake / sysroot，用完即销毁，不污染宿主机。</p>
+    </div>
+    <div class="feat-card">
+      <span class="feat-tag feat-tag-green">S3</span>
+      <h3>按平台隔离存储</h3>
+      <p>产物打包粒度精确到 target/{platform}/{mode}/，避免不同平台的产物混在一起。S3 key 格式：build/{id}/target-{id}.tar.gz。</p>
+    </div>
+    <div class="feat-card">
+      <span class="feat-tag feat-tag-amber">Cache</span>
+      <h3>Workspace Pool 复用</h3>
+      <p>源码克隆到 workspace pool 的独立目录，CMake 缓存跨次复用。S3 产物按 manifest content hash 缓存命中，直接跳过重复编译。</p>
+    </div>
+  </div>
+</section>
+
+<!-- QUICKSTART -->
+<section id="quickstart" style="padding-top:0;">
+  <div class="section-tag">Quick Start</div>
+  <h2 class="section-title">5 分钟跑起来</h2>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this, 'qs1')">启动服务</button>
+    <button class="tab-btn" onclick="switchTab(this, 'qs2')">发起构建</button>
+    <button class="tab-btn" onclick="switchTab(this, 'qs3')">查看日志</button>
+    <button class="tab-btn" onclick="switchTab(this, 'qs4')">下载产物</button>
+  </div>
+
+  <div id="qs1" class="tab-panel active">
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-title">1. 克隆项目</span>
+      </div>
+      <div class="code-body"><span class="k">git</span> clone https://github.com/wenjunli312-code/openbuilder-ui.git
+<span class="k">cd</span> openbuilder-ui</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-title">2. 配置 GitHub Token（访问私有仓库需要）</span>
+      </div>
+      <div class="code-body"><span class="k">echo</span> <span class="s">"GITHUB_TOKEN=ghp_xxxx"</span> > .env</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-title">3. 一键启动</span>
+      </div>
+      <div class="code-body"><span class="k">docker compose</span> up -d
+<span class="c"># 打开 http://localhost:8080</span></div>
+    </div>
+  </div>
+
+  <div id="qs2" class="tab-panel">
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-title">通过 API 发起构建</span>
+      </div>
+      <div class="code-body"><span class="k">curl</span> -X POST http://localhost:8080/api/builds \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -d <span class="s">'{
+    "project": "perception-core",
+    "platform": "linux-arm64",
+    "mode": "release",
+    "target": "perception-core",
+    "manifest": "repos:\n  - name: sensor-abstraction\n    url: https://github.com/owner/sensor-abstraction\n    revision: main\n  - name: vehicle-bridge\n    url: https://github.com/owner/vehicle-bridge\n    revision: develop\n"
+  }'</span>
+
+<span class="c"># 返回：{"id": "20260515_102400", "status": "pending"}</span></div>
+    </div>
+  </div>
+
+  <div id="qs3" class="tab-panel">
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-title">实时查看构建日志</span>
+      </div>
+      <div class="code-body"><span class="k">curl</span> http://localhost:8080/api/builds/20260515_102400/log
+<span class="c"># 返回：{ "status": "running", "log_length": 1234, "log_tail": "..." }</span></div>
+    </div>
+  </div>
+
+  <div id="qs4" class="tab-panel">
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-title">下载编译产物</span>
+      </div>
+      <div class="code-body"><span class="k">curl</span> -O http://localhost:8080/api/builds/20260515_102400/download
+<span class="c"># 下载 target-20260515_102400.tar.gz</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>OpenBuilder Web UI · Built with Flask + Vanilla JS · S3 存储 · Docker 隔离编译</p>
+  <p style="margin-top:8px;">仓库：
+    <a href="https://github.com/wenjunli312-code/openbuilder-ui" style="color:var(--accent2);text-decoration:none;">github.com/wenjunli312-code/openbuilder-ui</a>
+  </p>
+</footer>
+
+<script>
+function switchTab(btn, id) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Smooth scroll for nav links
+document.querySelectorAll('nav .nav-links a').forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(link.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+</script>
+</body>
+</html>

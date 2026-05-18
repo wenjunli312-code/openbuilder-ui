@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenBuilder - CMake 工作区与构建工具</title>
+<style>
+  :root {
+    --bg: #090e1a;
+    --surface: #0f1623;
+    --card: #162032;
+    --border: #1e3050;
+    --accent: #3b82f6;
+    --accent2: #60a5fa;
+    --accent-glow: rgba(59,130,246,0.3);
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --green: #34d399;
+    --amber: #fbbf24;
+    --red: #f87171;
+    --purple: #c084fc;
+    --code-bg: #080d14;
+    --code-border: #1a2d48;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    height: 60px;
+    background: rgba(9,14,26,0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  nav .logo { font-size: 18px; font-weight: 700; color: white; }
+  nav .logo span { color: var(--accent); }
+  nav .nav-links { display: flex; gap: 28px; list-style: none; }
+  nav .nav-links a { color: var(--muted); text-decoration: none; font-size: 14px; transition: color 0.2s; }
+  nav .nav-links a:hover { color: var(--text); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 100px 24px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -300px; left: 50%;
+    transform: translateX(-50%);
+    width: 900px; height: 900px;
+    background: radial-gradient(circle, var(--accent-glow) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    background: rgba(59,130,246,0.12);
+    border: 1px solid rgba(59,130,246,0.3);
+    border-radius: 100px;
+    font-size: 13px;
+    color: var(--accent2);
+    margin-bottom: 28px;
+  }
+  .hero-badge .dot {
+    width: 6px; height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+  .hero h1 {
+    font-size: clamp(40px, 8vw, 80px);
+    font-weight: 800;
+    letter-spacing: -3px;
+    line-height: 1.05;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #fff 30%, #93c5fd 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero .subtitle {
+    font-size: clamp(16px, 2.2vw, 21px);
+    color: var(--muted);
+    max-width: 620px;
+    margin-bottom: 48px;
+    line-height: 1.6;
+  }
+  .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .btn-primary {
+    padding: 12px 32px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    box-shadow: 0 0 40px var(--accent-glow);
+  }
+  .btn-primary:hover { background: #2563eb; transform: translateY(-2px); }
+  .btn-secondary {
+    padding: 12px 32px;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent2); }
+  .hero-term {
+    margin-top: 56px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .term-chip {
+    padding: 5px 14px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* SECTIONS */
+  section { padding: 100px 40px; max-width: 1200px; margin: 0 auto; }
+  .section-tag {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .section-title {
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+    color: white;
+  }
+  .section-desc { font-size: 16px; color: var(--muted); max-width: 620px; margin-bottom: 48px; }
+
+  /* WORKSPACE TREE */
+  .ws-tree {
+    font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+    font-size: 13px;
+    line-height: 2;
+    padding: 24px 30px;
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 14px;
+    color: #c9d1d9;
+    margin: 20px 0;
+  }
+  .ws-tree .d { color: var(--accent2); }
+  .ws-tree .f { color: #e2e8f0; }
+  .ws-tree .c { color: var(--muted); }
+  .ws-tree .h { color: var(--amber); }
+
+  /* CODE BLOCK */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 14px 0;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 18px;
+    background: #0d1520;
+    border-bottom: 1px solid var(--code-border);
+    font-size: 13px;
+  }
+  .code-dots { display: flex; gap: 6px; }
+  .code-dots span { width: 12px; height: 12px; border-radius: 50%; }
+  .code-dots span:nth-child(1) { background: #ff5f57; }
+  .code-dots span:nth-child(2) { background: #febc2e; }
+  .code-dots span:nth-child(3) { background: #28c840; }
+  .code-title { color: var(--muted); margin-left: 8px; }
+  .code-body {
+    padding: 20px 24px;
+    font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+    font-size: 13px;
+    line-height: 1.9;
+    overflow-x: auto;
+    color: #c9d1d9;
+    white-space: pre;
+  }
+  .code-body .cm { color: #8b949e; font-style: italic; }
+  .code-body .k { color: #ff7b72; }
+  .code-body .s { color: #a5d6ff; }
+  .code-body .v { color: #79c0ff; }
+  .code-body .n { color: #7ee787; }
+  .code-body .p { color: #ff7b72; }
+
+  /* CARD GRID */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    transition: all 0.25s;
+  }
+  .card:hover { border-color: rgba(59,130,246,0.4); transform: translateY(-2px); }
+  .card h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; color: white; }
+  .card p { font-size: 13px; color: var(--muted); line-height: 1.7; }
+
+  /* COMMAND RIBBON */
+  .cmd-ribbon {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 24px 0;
+  }
+  .cmd-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: monospace;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .cmd-chip:hover, .cmd-chip.active { border-color: var(--accent); color: var(--accent2); background: rgba(59,130,246,0.06); }
+  .cmd-chip .cmd-name { color: var(--accent2); font-weight: 600; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .tab-btn {
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: -1px;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent2); border-bottom-color: var(--accent); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* FLOW */
+  .flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    flex-wrap: wrap;
+    margin: 32px 0;
+  }
+  .flow-step {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 22px;
+    text-align: center;
+    min-width: 150px;
+    flex: 1;
+    transition: all 0.3s;
+  }
+  .flow-step:hover { border-color: rgba(59,130,246,0.5); transform: translateY(-2px); }
+  .flow-step .step-num {
+    font-size: 11px; font-weight: 700; color: var(--accent);
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;
+  }
+  .flow-step .step-icon { font-size: 26px; margin-bottom: 8px; }
+  .flow-step h4 { font-size: 14px; font-weight: 600; color: white; margin-bottom: 4px; }
+  .flow-step p { font-size: 12px; color: var(--muted); }
+  .flow-arrow { font-size: 22px; color: var(--border); padding: 0 2px; flex-shrink: 0; }
+
+  /* PLATFORM CARDS */
+  .plat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .plat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.25s;
+  }
+  .plat-card:hover { border-color: rgba(59,130,246,0.4); }
+  .plat-card .plat-icon { font-size: 32px; margin-bottom: 12px; }
+  .plat-card h4 { font-size: 15px; font-weight: 700; color: white; margin-bottom: 6px; }
+  .plat-card p { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+  /* FEATURE ROW */
+  .feat-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin: 24px 0;
+  }
+  @media (max-width: 800px) { .feat-row { grid-template-columns: 1fr; } }
+  .feat-row .card { height: 100%; }
+
+  /* DOCKER VISUAL */
+  .docker-flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin: 24px 0;
+  }
+  .docker-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 24px;
+    min-width: 200px;
+    text-align: center;
+  }
+  .docker-box.accent { border-color: rgba(59,130,246,0.4); }
+  .docker-box.green { border-color: rgba(52,211,153,0.3); background: rgba(52,211,153,0.04); }
+  .docker-box h4 { font-size: 14px; font-weight: 600; color: white; margin-bottom: 6px; }
+  .docker-box p { font-size: 12px; color: var(--muted); }
+
+  /* MANIFEST HIGHLIGHT */
+  .manifest-demo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin: 24px 0;
+  }
+  @media (max-width: 800px) { .manifest-demo { grid-template-columns: 1fr; } }
+
+  /* REVEAL */
+  .reveal { opacity: 0; transform: translateY(20px); transition: all 0.6s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 48px 40px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  footer a { color: var(--accent2); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 768px) {
+    section { padding: 60px 20px; }
+    nav { padding: 0 20px; }
+    .flow-arrow { display: none; }
+    .flow-step { min-width: 130px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">🛠️ Open<span>Builder</span></div>
+  <ul class="nav-links">
+    <li><a href="#intro">介绍</a></li>
+    <li><a href="#workspace">工作区</a></li>
+    <li><a href="#commands">命令</a></li>
+    <li><a href="#frontend">前端</a></li>
+ <li><a href="#cross-compile">交叉编译</a></li>
+    <li><a href="#quickstart">快速上手</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">
+    <span class="dot"></span>
+    CMake 驱动 · 交叉编译 · S3 存储
+  </div>
+  <h1>OpenBuilder</h1>
+  <p class="subtitle">
+    面向 CMake 项目的<strong style="color:white;">声明式工作区与构建工具</strong>，<br>
+    一份 manifest.yaml 描述所有依赖，支持 ARM64 / ARMv7 交叉编译，<br>
+    编译产物自动上传 S3，可随时回溯下载。
+  </p>
+  <div class="hero-actions">
+    <a href="#quickstart" class="btn-primary">快速上手 →</a>
+    <a href="#commands" class="btn-secondary">命令一览</a>
+  </div>
+  <div class="hero-term">
+    <span class="term-chip">Python 3.9+</span>
+    <span class="term-chip">Click CLI</span>
+    <span class="term-chip">CMake</span>
+    <span class="term-chip">Docker</span>
+    <span class="term-chip">S3 / MinIO</span>
+    <span class="term-chip">Boto3</span>
+  </div>
+</div>
+
+<!-- INTRO -->
+<section id="intro">
+  <div class="section-tag">Why OpenBuilder</div>
+  <h2 class="section-title">为什么需要 OpenBuilder</h2>
+  <p class="section-desc">嵌入式项目中，多个 Git 仓库（sensor、perception、control…）有依赖关系，手动 cmake 调用容易出错，交叉编译更是繁琐。OpenBuilder 用一份 manifest 把这些问题自动化。</p>
+
+  <div class="feat-row">
+    <div class="card">
+      <h3>📋 声明式依赖管理</h3>
+      <p style="margin-top:10px;">所有仓库写在 <strong style="color:white;">manifest.yaml</strong> 里，OpenBuilder 自动解析 deps、计算拓扑顺序、克隆源码。你只需要声明"要什么"，不用管"怎么编译"。</p>
+    </div>
+    <div class="card">
+      <h3>🔄 自动交叉编译</h3>
+      <p style="margin-top:10px;">设一次 <code style="font-size:12px;background:rgba(59,130,246,0.1);padding:2px 6px;border-radius:4px;">openbuilder configure platform linux-arm64</code>，之后的每次 build 自动通过 Docker 调起 dockcross 交叉编译镜像，CMakeLists.txt 无需任何修改。</p>
+    </div>
+    <div class="card">
+      <h3>☁️ 产物 S3 持久化</h3>
+      <p style="margin-top:10px;">每次 <code style="font-size:12px;background:rgba(59,130,246,0.1);padding:2px 6px;border-radius:4px;">openbuilder publish</code> 把 target/ 打包成 tar.gz，按 build ID 上传 S3，任何时候都能用 <code style="font-size:12px;background:rgba(59,130,246,0.1);padding:2px 6px;border-radius:4px;">openbuilder download --id N</code> 回溯历史产物。</p>
+    </div>
+    <div class="card">
+      <h3>🗂️ 虚拟项目节点</h3>
+      <p style="margin-top:10px;">manifest 支持没有 url 的"虚拟节点"，用来给真实仓库分组。<code style="font-size:12px;background:rgba(59,130,246,0.1);padding:2px 6px;border-radius:4px;">openbuilder build perception --recursive</code> 自动展开虚拟节点的依赖链，一次构建完整系统。</p>
+    </div>
+  </div>
+</section>
+
+<!-- WORKSPACE -->
+<section id="workspace">
+  <div class="section-tag">Workspace</div>
+  <h2 class="section-title">工作区目录结构</h2>
+  <p class="section-desc">运行 <code>openbuilder init</code> 后，在当前目录创建标准工作区布局，灵感来自 Zephyr 的 west。</p>
+
+  <div class="ws-tree" style="line-height:1.8;">
+<div><span class="d">my-project/</span></div>
+<div style="padding-left:24px;"><span class="d">.openbuilder/</span> <span class="c">← 工作区配置目录（始终存在）</span></div>
+<div style="padding-left:48px;"><span class="f">config.yaml</span> <span class="c">← 工作区 + CMake 全局设置</span></div>
+<div style="padding-left:48px;"><span class="f">manifest.yaml</span> <span class="c">← 项目 manifest（repos、deps）</span></div>
+<div style="padding-left:24px;"><span class="d">src/</span> <span class="c">← 所有源码仓库（git clone 到这里）</span></div>
+<div style="padding-left:48px;"><span class="d">sensor-abstraction/</span></div>
+<div style="padding-left:48px;"><span class="d">vehicle-bridge/</span></div>
+<div style="padding-left:48px;"><span class="d">perception-core/</span></div>
+<div style="padding-left:24px;"><span class="d">build/</span> <span class="c">← CMake out-of-tree 构建产物</span></div>
+<div style="padding-left:24px;"><span class="d">target/</span> <span class="c">← install_prefix，最终编译产物</span></div>
+<div style="padding-left:48px;"><span class="d">linux-arm64/</span> <span class="c">← 交叉编译按平台隔离</span></div>
+<div style="padding-left:72px;"><span class="d">release/</span> <span class="c">← 编译类型隔离（debug / release / releasewithdebuginfo）</span></div>
+<div style="padding-left:96px;"><span class="f">lib/</span> <span class="c">← .so / .a 文件</span></div>
+<div style="padding-left:96px;"><span class="f">bin/</span> <span class="c">← 可执行文件</span></div>
+</div>
+
+  <div class="manifest-demo">
+    <div>
+      <h3 style="font-size:16px;font-weight:700;color:white;margin-bottom:14px;">manifest.yaml 示例</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dots"><span></span><span></span><span></span></div>
+          <span class="code-title">.openbuilder/manifest.yaml</span>
+        </div>
+        <div class="code-body"><span class="cm"># OpenBuilder manifest</span>
+<span class="k">workspace:</span>
+  <span class="k">name:</span> <span class="s">perception-workspace</span>
+  <span class="k">config_repo:</span> <span class="s">git@github.com:org/config.git</span>
+  <span class="k">current_project:</span> <span class="s">perception-core</span>
+
+<span class="k">projects:</span>
+  - <span class="k">name:</span> <span class="s">sensor-abstraction</span>
+    <span class="k">url:</span> <span class="s">git@github.com:wenjunli312-code/sensor-abstraction.git</span>
+    <span class="k">revision:</span> <span class="s">main</span>
+    <span class="k">deps:</span> []
+  - <span class="k">name:</span> <span class="s">vehicle-bridge</span>
+    <span class="k">url:</span> <span class="s">git@github.com:wenjunli312-code/vehicle-bridge.git</span>
+    <span class="k">revision:</span> <span class="s">develop</span>
+    <span class="k">deps:</span>
+      - <span class="s">sensor-abstraction</span>
+  - <span class="k">name:</span> <span class="s">perception-core</span>  <span class="cm"># 虚拟节点（无 url）</span>
+    <span class="k">deps:</span>
+      - <span class="s">sensor-abstraction</span>
+      - <span class="s">vehicle-bridge</span>
+
+<span class="k">s3:</span>
+  <span class="k">endpoint:</span> <span class="s">http://localhost:9000</span>
+  <span class="k">bucket:</span> <span class="s">openbuilder-builds</span>
+  <span class="k">region:</span> <span class="s">us-east-1</span>
+  <span class="k">access_key_id:</span> <span class="s">minioadmin</span>
+  <span class="k">secret_access_key:</span> <span class="s">minioadmin</span>
+
+<span class="k">cmake:</span>
+  <span class="k">build_type:</span> <span class="s">release</span></div>
+      </div>
+    </div>
+    <div>
+      <h3 style="font-size:16px;font-weight:700;color:white;margin-bottom:14px;">依赖拓扑解析</h3>
+      <div class="card" style="height:auto;">
+        <p style="margin-bottom:16px;color:var(--muted);font-size:13px;">
+          给定目标 <code style="font-size:12px;">perception-core --recursive</code>，OpenBuilder 自动：
+        </p>
+        <div style="font-size:13px;line-height:2.2;color:#c9d1d9;font-family:monospace;">
+          1. 识别 <span style="color:var(--amber);">perception-core</span> 是虚拟节点<br>
+          2. 展开 deps → <span style="color:var(--green);">vehicle-bridge</span>, <span style="color:var(--green);">sensor-abstraction</span><br>
+          3. <span style="color:var(--green);">vehicle-bridge</span> 依赖 <span style="color:var(--green);">sensor-abstraction</span><br>
+          4. 拓扑排序：sensor-abstraction → vehicle-bridge → perception-core<br>
+          5. 按顺序执行 cmake configure + build + install<br>
+        </div>
+        <div style="margin-top:16px;padding:12px;background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.2);border-radius:8px;">
+          <span style="font-size:13px;color:var(--green);">✅ 循环依赖检测</span> — 检测到 circular deps 时立即报错并退出
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMMANDS -->
+<section id="commands">
+  <div class="section-tag">Commands</div>
+  <h2 class="section-title">命令一览</h2>
+  <p class="section-desc">所有命令通过 Click 实现，提供完整的 --help 和 Tab 自动补全（shell-completion）。</p>
+
+  <div class="cmd-ribbon">
+    <button class="cmd-chip active" onclick="switchCmd(this, 'cmd-version')"><span class="cmd-name">version</span></button>
+    <button class="cmd-chip" onclick="switchCmd(this, 'cmd-init')"><span class="cmd-name">init</span></button>
+    <button class="cmd-chip" onclick="switchCmd(this, 'cmd-clone')"><span class="cmd-name">clone</span></button>
+    <button class="cmd-chip" onclick="switchCmd(this, 'cmd-build')"><span class="cmd-name">build</span></button>
+    <button class="cmd-chip" onclick="switchCmd(this, 'cmd-configure')"><span class="cmd-name">configure</span></button>
+    <button class="cmd-chip" onclick="switchCmd(this, 'cmd-publish')"><span class="cmd-name">publish</span></button>
+    <button class="cmd-chip" onclick="switchCmd(this, 'cmd-download')"><span class="cmd-name">download</span></button>
+    <button class="cmd-chip" onclick="switchCmd(this, 'cmd-platform')"><span class="cmd-name">platform</span></button>
+    <button class="cmd-chip" onclick="switchCmd(this, 'cmd-show')"><span class="cmd-name">show</span></button>
+    <button class="cmd-chip" onclick="switchCmd(this, 'cmd-status')"><span class="cmd-name">status</span></button>
+    <button class="cmd-chip" onclick="switchCmd(this, 'cmd-clean')"><span class="cmd-name">clean</span></button>
+    <button class="cmd-chip" onclick="switchCmd(this, 'cmd-doctor')"><span class="cmd-name">doctor</span></button>
+  </div>
+
+  <div id="cmd-version" class="cmd-panel active">
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-title">打印当前版本</span></div>
+      <div class="code-body"><span class="k">openbuilder</span> version
+<span class="cm"># → OpenBuilder 0.2.0</span></div>
+    </div>
+  </div>
+
+  <div id="cmd-init" class="cmd-panel">
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-title">在当前目录初始化工作区</span></div>
+      <div class="code-body"><span class="k">openbuilder</span> init
+<span class="cm"># → Initialized OpenBuilder workspace at /path/to/my-project</span>
+<span class="cm"># → Config repo: git@github.com:org/config.git</span>
+<span class="cm"># → Run 'openbuilder configure project <name>' to set the project</span>
+<span class="cm"># → Or: eval "$(openbuilder init --export)"</span></div>
+    </div>
+    <div class="card" style="margin-top:16px;">
+      <h3>init 做了什么</h3>
+      <p>① 创建 src/、build/、target/ 目录；② 从配置仓库克隆 .openbuilder/ 到工作区；③ 合并 s3.yaml（S3 配置）；④ 写入 manifest.yaml。</p>
+    </div>
+  </div>
+
+  <div id="cmd-clone" class="cmd-panel">
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-title">克隆一个或多个 repo 到 src/</span></div>
+      <div class="code-body"><span class="k">openbuilder</span> clone sensor-abstraction vehicle-bridge
+<span class="cm"># → Cloning 'sensor-abstraction' from git@github.com:org/sensor-abstraction (branch: main) → src/sensor-abstraction</span>
+<span class="cm"># → Cloning 'vehicle-bridge' from git@github.com:org/vehicle-bridge (branch: develop) → src/vehicle-bridge</span>
+<span class="cm"># → Done.</span></div>
+    </div>
+    <div class="card" style="margin-top:16px;">
+      <h3>clone 特性</h3>
+      <p>· 自动按拓扑顺序克隆（有 deps 的 repo 后克隆）<br>· 跳过已存在的目录（不会重复 clone）<br>· REPOS 参数必填，支持一次传多个</p>
+    </div>
+  </div>
+
+  <div id="cmd-build" class="cmd-panel">
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-title">构建（CMake configure + build + install）</span></div>
+      <div class="code-body"><span class="k">openbuilder</span> build                          <span class="cm"># 构建所有 repos</span>
+<span class="k">openbuilder</span> build sensor-abstraction        <span class="cm"># 只构建指定 repo</span>
+<span class="k">openbuilder</span> build perception-core -r          <span class="cm"># 递归构建（含 deps）</span>
+<span class="k">openbuilder</span> build -j 8 --build-type release  <span class="cm"># 指定并行数 + build type</span>
+
+<span class="cm"># 输出示例：</span>
+<span class="k">==> Building</span> <span class="s">'sensor-abstraction'</span>
+<span class="cm">  $ cmake -B build/sensor-abstraction -S src/sensor-abstraction ...</span>
+<span class="cm">  $ cmake --build build/sensor-abstraction</span>
+<span class="cm">  $ cmake --install build/sensor-abstraction</span>
+<span class="k">==> Building</span> <span class="s">'vehicle-bridge'</span>
+<span class="cm">  $ cmake ... -DCMAKE_PREFIX_PATH=target/lib/cmake ...</span>
+<span class="cm">Build complete.</span></div>
+    </div>
+    <div class="card" style="margin-top:16px;">
+      <h3>build 的关键逻辑</h3>
+      <p>· <strong style="color:white;">拓扑排序</strong>：按 deps 依赖顺序构建，保证依赖库先就位<br>· <strong style="color:white;">CMAKE_PREFIX_PATH</strong>：自动把已安装的库路径注入 CMake，跨 repo 依赖无需手动 pkg-config<br>· <strong style="color:white;">--recursive</strong>：虚拟节点的 deps 自动展开成完整构建列表<br>· <strong style="color:white;">Build complete.</strong> 判断：必须看到 "Build complete." 才算成功（不能只看 returncode）</p>
+    </div>
+  </div>
+
+  <div id="cmd-configure" class="cmd-panel">
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-title">配置当前项目和交叉编译平台</span></div>
+      <div class="code-body"><span class="k">openbuilder</span> configure project perception-core   <span class="cm"># 设置当前项目</span>
+<span class="k">openbuilder</span> configure platform linux-arm64     <span class="cm"># 设置目标平台（ARM64）</span></div>
+    </div>
+    <div class="card" style="margin-top:16px;">
+      <h3>configure platform 的效果</h3>
+      <p>写入 manifest.yaml 的 <code>workspace.current_platform</code>，之后的 <code>build</code> 自动切换到 Docker 交叉编译模式，不再调用宿主机 gcc/g++。</p>
+    </div>
+  </div>
+
+  <div id="cmd-publish" class="cmd-panel">
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-title">打包并发布 target/ 到 S3</span></div>
+      <div class="code-body"><span class="k">openbuilder</span> publish list              <span class="cm"># 查看已发布的 builds</span>
+<span class="k">openbuilder</span> publish upload --s3      <span class="cm"># 上传到 S3（自动分配 build ID）</span>
+<span class="k">openbuilder</span> publish rm 10042         <span class="cm"># 删除本地 build 记录</span>
+
+<span class="cm"># upload 输出：</span>
+<span class="cm">  target hash: sha256:abc123...   (对 target/ 内容做 SHA256)</span>
+<span class="cm">  build id: 10042 (从 S3 原子分配，避免并发冲突)</span>
+<span class="cm">  uploading tarball to S3: build/10042/target-10042.tar.gz</span>
+<span class="cm">  uploading info to S3: build/10042/build-info-10042.json</span>
+<span class="cm">Published to S3 as build 10042.</span></div>
+    </div>
+  </div>
+
+  <div id="cmd-download" class="cmd-panel">
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-title">从 S3 下载历史 build 产物</span></div>
+      <div class="code-body"><span class="k">openbuilder</span> download --id 10042        <span class="cm"># 下载指定 build 的 tar.gz 并解压到 target/</span>
+<span class="k">openbuilder</span> download --platform linux-arm64  <span class="cm"># 下载平台 Docker 镜像（.tar.gz from S3）</span></div>
+    </div>
+  </div>
+
+  <div id="cmd-platform" class="cmd-panel">
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-title">查看平台镜像状态</span></div>
+      <div class="code-body"><span class="k">openbuilder</span> platform list
+<span class="cm"># → Platform        Image                     Status</span>
+<span class="cm"># → linux-arm64     dockcross/linux-arm64-full  loaded</span>
+<span class="cm"># → linux-armv7     dockcross/linux-armv7       not-loaded</span>
+<span class="cm"># → linux-x86_64    (native)                   —</span></div>
+    </div>
+  </div>
+
+  <div id="cmd-show" class="cmd-panel">
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-title">显示当前工作区信息</span></div>
+      <div class="code-body"><span class="k">openbuilder</span> show
+<span class="cm"># → Workspace: /path/to/my-project</span>
+<span class="cm"># → Platform: linux-arm64</span>
+<span class="cm"># → Config repo: git@github.com:org/config</span>
+<span class="cm"># → Projects: 3 repos</span></div>
+    </div>
+  </div>
+
+  <div id="cmd-status" class="cmd-panel">
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-title">查看所有 repo 的 git 状态</span></div>
+      <div class="code-body"><span class="k">openbuilder</span> status
+<span class="cm"># → repo                  branch    commit     dirty</span>
+<span class="cm"># → sensor-abstraction    main      7450c85   no</span>
+<span class="cm"># → vehicle-bridge        develop   ac2c3f5   yes  ← 有未提交修改</span></div>
+    </div>
+  </div>
+
+  <div id="cmd-clean" class="cmd-panel">
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-title">清理构建产物</span></div>
+      <div class="code-body"><span class="k">openbuilder</span> clean             <span class="cm"># 删除 build/ 目录（CMake 缓存）</span>
+<span class="k">openbuilder</span> clean --target    <span class="cm"># 删除 target/（清理 install 产物）</span>
+<span class="k">openbuilder</span> clean --all      <span class="cm"># 删除 build/ + target/</span></div>
+    </div>
+  </div>
+
+  <div id="cmd-doctor" class="cmd-panel">
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-title">检查环境问题</span></div>
+      <div class="code-body"><span class="k">openbuilder</span> doctor
+<span class="cm"># → Checking environment...</span>
+<span class="cm"># → ✅ Python 3.11</span>
+<span class="cm"># → ✅ Git found</span>
+<span class="cm"># → ✅ Docker available</span>
+<span class="cm"># → ✅ S3 configured</span>
+<span class="cm"># → ✅ CMake found</span>
+<span class="cm"># → ✅ OpenBuilder workspace found</span>
+<span class="cm"># → 0 issue(s) found.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- CROSS COMPILE -->
+<section id="cross-compile">
+  <div class="section-tag">Cross-Compilation</div>
+  <h2 class="section-title">跨平台交叉编译</h2>
+  <p class="section-desc">OpenBuilder 通过 Docker + dockcross 镜像实现零配置交叉编译。CMakeLists.txt 完全不需要改动，toolchain 在 cmake configure 时自动注入。</p>
+
+  <div class="plat-grid">
+    <div class="plat-card">
+      <div class="plat-icon">🦄</div>
+      <h4>linux-arm64</h4>
+      <p>ARM 64-bit (AArch64)<br>dockcross/linux-arm64-full<br>5.42 GB 镜像</p>
+    </div>
+    <div class="plat-card">
+      <div class="plat-icon">🦄</div>
+      <h4>linux-armv7</h4>
+      <p>ARM 32-bit (hardfloat)<br>dockcross/linux-armv7<br>4.61 GB 镜像</p>
+    </div>
+    <div class="plat-card">
+      <div class="plat-icon">💻</div>
+      <h4>linux-x86_64</h4>
+      <p>x86 本地开发/测试<br>直接调用系统 gcc/cmake<br>无需 Docker</p>
+    </div>
+  </div>
+
+  <div class="docker-flow">
+    <div class="docker-box">
+      <h4>1. download --platform</h4>
+      <p>从 S3 下载镜像 .tar.gz<br>→ <code>docker load</code> 到本地</p>
+    </div>
+    <div style="font-size:22px;color:var(--muted);">→</div>
+    <div class="docker-box">
+      <h4>2. configure platform</h4>
+      <p>写入 manifest.yaml<br>current_platform=linux-arm64</p>
+    </div>
+    <div style="font-size:22px;color:var(--muted);">→</div>
+    <div class="docker-box accent">
+      <h4>3. build</h4>
+      <p>自动调起 docker run --rm<br>dockcross/linux-arm64-full<br>注入 dockcross.cmake</p>
+    </div>
+    <div style="font-size:22px;color:var(--muted);">→</div>
+    <div class="docker-box green">
+      <h4>4. 产物写入 target/</h4>
+      <p>target/linux-arm64/release/<br>lib/ + bin/ + include/</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-title">build 在 Docker 模式下的 cmake 实际调用</span>
+    </div>
+    <div class="code-body"><span class="k">docker run</span> --rm \
+  -v /path/to/workspace:/src \
+  -v /path/to/workspace/target/linux-arm64/release:/target \
+  -w /src \
+  dockcross/linux-arm64-full \
+  bash -c <span class="s">"cmake -B build/sensor-abstraction</span>
+<span class="s">  -S src/sensor-abstraction</span>
+<span class="s">  -DCMAKE_INSTALL_PREFIX=/target</span>
+<span class="s">  -DCMAKE_BUILD_TYPE=release</span>
+<span class="s">  && cmake --build build/sensor-abstraction</span>
+<span class="s">  && cmake --install build/sensor-abstraction"</span></div>
+  </div>
+</section>
+<!-- FRONTEND -->
+<section id="frontend">
+ <div class="section-tag">Frontend</div>
+ <h2 class="section-title">三个单页，覆盖全流程</h2>
+ <p class="section-desc">纯 HTML + Vanilla JS，零依赖，零框架，可直接在浏览器打开或嵌入 WebView。三个页面分工明确，数据通过 REST API 与后端交互。</p>
+
+ <!-- index.html Mockup -->
+ <h3 style="font-size:18px;font-weight:700;color:white;margin-bottom:16px;">🏠 构建列表 — index.html</h3>
+ <div class="code-block" style="border-radius:16px;overflow:hidden;margin-bottom:32px;">
+  <div class="code-header">
+   <div class="code-dots"><span></span><span></span><span></span></div>
+   <span class="code-title">index.html — 构建列表</span>
+  </div>
+  <div style="background:var(--surface);padding:24px;border-bottom:1px solid var(--code-border);">
+   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+    <h3 style="font-size:20px;font-weight:700;color:white;">🔨 OpenBuilder Dashboard</h3>
+    <div style="display:flex;gap:8px;">
+     <button style="padding:8px 18px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">+ 发起新构建</button>
+     <button style="padding:8px 18px;background:transparent;color:var(--accent2);border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;">🔍 比较</button>
+    </div>
+   </div>
+   <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <thead>
+     <tr style="background:rgba(59,130,246,0.08);text-align:left;">
+      <th style="padding:10px 14px;color:var(--accent2);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid var(--border);">Build ID</th>
+      <th style="padding:10px 14px;color:var(--accent2);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid var(--border);">Project</th>
+      <th style="padding:10px 14px;color:var(--accent2);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid var(--border);">Target</th>
+      <th style="padding:10px 14px;color:var(--accent2);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid var(--border);">Platform</th>
+      <th style="padding:10px 14px;color:var(--accent2);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid var(--border);">Mode</th>
+      <th style="padding:10px 14px;color:var(--accent2);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid var(--border);">Status</th>
+      <th style="padding:10px 14px;color:var(--accent2);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid var(--border);">Time</th>
+      <th style="padding:10px 14px;color:var(--accent2);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid var(--border);">Action</th>
+     </tr>
+    </thead>
+    <tbody style="color:#c9d1d9;">
+     <tr>
+      <td style="padding:10px 14px;font-family:monospace;font-size:12px;border-bottom:1px solid rgba(30,48,80,0.5);">20260515_101200</td>
+      <td style="padding:10px 14px;border-bottom:1px solid rgba(30,48,80,0.5);">demo</td>
+      <td style="padding:10px 14px;border-bottom:1px solid rgba(30,48,80,0.5);">perception-core</td>
+      <td style="padding:10px 14px;border-bottom:1px solid rgba(30,48,80,0.5);">linux-arm64</td>
+      <td style="padding:10px 14px;border-bottom:1px solid rgba(30,48,80,0.5);">release</td>
+      <td style="padding:10px 14px;border-bottom:1px solid rgba(30,48,80,0.5);"><span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:100px;font-size:12px;font-weight:500;background:rgba(52,211,153,0.15);color:var(--green);">✅ Success</span></td>
+      <td style="padding:10px 14px;border-bottom:1px solid rgba(30,48,80,0.5);">02m 34s</td>
+      <td style="padding:10px 14px;border-bottom:1px solid rgba(30,48,80,0.5);"><button style="padding:4px 10px;background:transparent;color:var(--accent2);border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer;">详情</button></td>
+     </tr>
+     <tr>
+      <td style="padding:10px 14px;font-family:monospace;font-size:12px;border-bottom:1px solid rgba(30,48,80,0.5);">20260515_095830</td>
+      <td style="padding:10px 14px;border-bottom:1px solid rgba(30,48,80,0.5);">demo</td>
+      <td style="padding:10px 14px;border-bottom:1px solid rgba(30,48,80,0.5);">vehicle-bridge</td>
+      <td style="padding:10px 14px;border-bottom:1px solid rgba(30,48,80,0.5);">linux-arm64</td>
+      <td style="padding:10px 14px;border-bottom:1px solid rgba(30,48,80,0.5);">debug</td>
+      <td style="padding:10px 14px;border-bottom:1px solid rgba(30,48,80,0.5);"><span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:100px;font-size:12px;font-weight:500;background:rgba(251,191,36,0.15);color:var(--amber);">⏳ Running</span></td>
+      <td style="padding:10px 14px;border-bottom:1px solid rgba(30,48,80,0.5);">—</td>
+      <td style="padding:10px 14px;border-bottom:1px solid rgba(30,48,80,0.5);"><button style="padding:4px 10px;background:transparent;color:var(--accent2);border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer;">详情</button></td>
+     </tr>
+    <tr>
+      <td style="padding:10px 14px;font-family:monospace;font-size:12px;border-bottom:1px solid rgba(30,48,80,0.5);">20260514_182100</td>
+      <td style="padding:10px 14px;border-bottom:1px solid rgba(30,48,80,0.5);">demo</td>
+      <td style="padding:10px 14px;border-bottom:1px solid rgba(30,48,80,0.5);">sensor-abstraction</td>
+      <td style="padding:10px 14px;border-bottom:1px solid rgba(30,48,80,0.5);">linux-x86_64</td>
+      <td style="padding:10px 14px;border-bottom:1px solid rgba(30,48,80,0.5);">release</td>
+      <td style="padding:10px 14px;border-bottom:1px solid rgba(30,48,80,0.5);"><span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:100px;font-size:12px;font-weight:500;background:rgba(248,113,113,0.15);color:var(--red);">❌ Failed</span></td>
+      <td style="padding:10px 14px;border-bottom:1px solid rgba(30,48,80,0.5);">01m 12s</td>
+      <td style="padding:10px 14px;border-bottom:1px solid rgba(30,48,80,0.5);"><button style="padding:4px 10px;background:transparent;color:var(--accent2);border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer;">详情</button></td>
+     </tr>
+    </tbody>
+   </table>
+  </div>
+ </div>
+
+ <!-- build.html Mockup -->
+ <h3 style="font-size:18px;font-weight:700;color:white;margin-bottom:16px;">📦 构建详情 — build.html</h3>
+ <div class="code-block" style="border-radius:16px;overflow:hidden;margin-bottom:32px;">
+  <div class="code-header">
+   <div class="code-dots"><span></span><span></span><span></span></div>
+   <span class="code-title">build.html — 构建详情</span>
+  </div>
+  <div style="background:var(--surface);padding:24px;border-bottom:1px solid var(--code-border);">
+   <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+    <span style="padding:6px 14px;background:rgba(59,130,246,0.12);color:var(--accent2);border:1px solid rgba(59,130,246,0.3);border-radius:6px;font-size:13px;cursor:pointer;">← 返回列表</span>
+    <h3 style="font-size:20px;color:var(--accent2);">Build Detail</h3>
+   </div>
+   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:20px;">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+     <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Build ID</div>
+     <div style="font-size:13px;color:var(--text);font-family:monospace;">20260515_101200</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+     <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Status</div>
+     <div><span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:100px;font-size:12px;font-weight:500;background:rgba(52,211,153,0.15);color:var(--green);">✅ Success</span></div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+     <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Target</div>
+     <div style="font-size:14px;color:var(--text);">perception-core</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+     <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Platform</div>
+     <div style="font-size:14px;color:var(--text);">linux-arm64</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+     <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Mode</div>
+     <div style="font-size:14px;color:var(--text);">release</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+     <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Duration</div>
+     <div style="font-size:14px;color:var(--text);">02m 34s</div>
+    </div>
+   </div>
+   <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);">
+     <span style="font-size:13px;font-weight:600;color:var(--accent2);text-transform:uppercase;letter-spacing:0.5px;">📦 编译产物</span>
+     <a href="#" style="padding:8px 20px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">⬇ 下载 .tar.gz</a>
+    </div>
+    <div style="display:flex;gap:24px;flex-wrap:wrap;">
+     <div><span style="font-size:12px;color:var(--muted);">文件名</span><div style="font-size:13px;font-family:monospace;margin-top:4px;">target-20260515_101200.tar.gz</div></div>
+     <div><span style="font-size:12px;color:var(--muted);">S3 路径</span><div style="font-size:13px;font-family:monospace;margin-top:4px;">build/001/target-001.tar.gz</div></div>
+     <div><span style="font-size:12px;color:var(--muted);">状态</span><div style="font-size:13px;margin-top:4px;color:var(--green);">✓ 就绪，可下载</div></div>
+    </div>
+   </div>
+   <div style="background:#080d14;border-radius:8px;padding:18px;font-family:monospace;font-size:12px;color:#c9d1d9;line-height:1.7;white-space:pre-wrap;max-height:160px;overflow-y:auto;">
+[build] Starting OpenBuilder build...
+[build] Platform: linux-arm64, Mode: release
+[build] Cloning repos from manifest...
+[build] cmake Configure started
+[build] make -j8 started
+[build] Build complete. Artifacts in target/
+✓ SUCCESS — 02m 34s</div>
+  </div>
+ </div>
+
+ <!-- compare.html Mockup -->
+ <h3 style="font-size:18px;font-weight:700;color:white;margin-bottom:16px;">⚖️ 构建对比 — compare.html</h3>
+ <div class="code-block" style="border-radius:16px;overflow:hidden;margin-bottom:32px;">
+  <div class="code-header">
+   <div class="code-dots"><span></span><span></span><span></span></div>
+   <span class="code-title">compare.html — 构建对比</span>
+  </div>
+  <div style="background:var(--surface);padding:24px;border-bottom:1px solid var(--code-border);">
+   <div style="display:flex;gap:16px;margin-bottom:20px;">
+    <div style="flex:1;">
+     <div style="font-size:13px;color:var(--muted);margin-bottom:8px;">Build ID 1 (左)</div>
+     <input type="text" value="20260515_101200" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;font-family:monospace;background:var(--code-bg);color:var(--text);">
+    </div>
+    <div style="flex:1;">
+     <div style="font-size:13px;color:var(--muted);margin-bottom:8px;">Build ID 2 (右)</div>
+     <input type="text" value="20260514_182100" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;font-family:monospace;background:var(--code-bg);color:var(--text);">
+    </div>
+   </div>
+   <button style="background:var(--accent);color:white;border:none;padding:12px 32px;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;">比较</button>
+   <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
+    <div style="display:flex;gap:12px;margin-bottom:16px;">
+     <div style="flex:1;padding:12px 14px;background:rgba(59,130,246,0.08);border:1px solid var(--border);border-radius:8px;font-weight:600;font-size:14px;color:var(--accent2);">← 左: <span style="font-family:monospace;">20260515_101200</span></div>
+     <div style="flex:1;padding:12px 14px;background:rgba(59,130,246,0.08);border:1px solid var(--border);border-radius:8px;font-weight:600;font-size:14px;color:var(--accent2);">→ 右: <span style="font-family:monospace;">20260514_182100</span></div>
+    </div>
+    <div style="display:flex;align-items:center;padding:10px 14px;margin-bottom:8px;border-radius:8px;background:rgba(52,211,153,0.12);color:var(--green);"><span style="font-size:18px;margin-right:10px;">✓</span><span style="font-weight:600;width:80px;">Project</span><span style="font-family:monospace;">demo</span><span style="font-family:monospace;margin-left:auto;">demo</span></div>
+    <div style="display:flex;align-items:center;padding:10px 14px;margin-bottom:8px;border-radius:8px;background:rgba(248,113,113,0.12);color:var(--red);"><span style="font-size:18px;margin-right:10px;">✗</span><span style="font-weight:600;width:80px;">Platform</span><span style="font-family:monospace;">linux-arm64</span><span style="font-family:monospace;margin-left:auto;">linux-x86_64</span></div>
+    <div style="margin-top:16px;"><strong style="font-size:13px;color:var(--muted);">Repo 对比:</strong></div>
+    <div style="display:flex;justify-content:space-between;padding:10px 14px;margin-top:8px;border-radius:6px;background:rgba(52,211,153,0.12);color:var(--green);"><span style="font-weight:500;">common-utils</span><span>✓ unchanged</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;margin-top:8px;border-radius:6px;background:rgba(251,191,36,0.12);color:var(--amber);"><span style="font-weight:500;">perception-core</span><span style="color:var(--accent2);">↗ modified</span></div>
+    <div style="margin-left:20px;margin-top:6px;padding-left:12px;border-left:3px solid var(--border);">
+     <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">↑ abc1234 → def5678</div>
+     <a href="#" style="font-size:13px;color:var(--accent2);text-decoration:none;">🔗 在 GitHub 上查看完整对比 →</a>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:10px 14px;margin-top:8px;border-radius:6px;background:rgba(248,113,113,0.12);color:var(--red);"><span style="font-weight:500;">vehicle-bridge</span><span>✗ 仅存在于右</span></div>
+   </div>
+  </div>
+ </div>
+
+ <!-- 功能三卡片 -->
+ <div class="card-grid" style="margin-top:0;">
+  <div class="card">
+   <h3>🏠 构建列表</h3>
+   <p style="margin-top:8px;">查看所有历史构建，支持按状态筛选。<strong style="color:var(--amber);">发起新构建</strong>，在弹窗中填写 Project / Target / Platform / Mode，选择 manifest.yaml 后提交。</p>
+  </div>
+  <div class="card">
+   <h3>📦 构建详情</h3>
+   <p style="margin-top:8px;">每个 Build 的专属页面。顶部展示 Build ID / Target / Platform / Mode / Status / Duration；中间是编译产物区和下载按钮；底部实时显示编译日志。</p>
+  </div>
+  <div class="card">
+   <h3>⚖️ 构建对比</h3>
+   <p style="margin-top:8px;">输入两个 Build ID，对比它们的项目配置和所有依赖 Repo 的 commit 差异。颜色标记变化（绿=相同，红=不同），点击 GitHub 链接查看完整 diff。</p>
+  </div>
+ </div>
+</section>
+
+
+
+<!-- QUICKSTART -->
+<section id="quickstart">
+  <div class="section-tag">Quick Start</div>
+  <h2 class="section-title">快速上手</h2>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this,'qs1')">安装</button>
+    <button class="tab-btn" onclick="switchTab(this,'qs2')">初始化</button>
+    <button class="tab-btn" onclick="switchTab(this,'qs3')">构建</button>
+    <button class="tab-btn" onclick="switchTab(this,'qs4')">发布 & 下载</button>
+  </div>
+
+  <div id="qs1" class="tab-panel active">
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-title">安装（可编辑模式）</span></div>
+      <div class="code-body"><span class="k">pip install -e</span> .
+<span class="k">openbuilder</span> version
+<span class="cm"># → OpenBuilder 0.2.0</span></div>
+    </div>
+  </div>
+
+  <div id="qs2" class="tab-panel">
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-title">初始化工作区 + 配置项目 + 克隆源码</span></div>
+      <div class="code-body"><span class="k">mkdir</span> my-project && <span class="k">cd</span> my-project
+<span class="k">openbuilder</span> init
+<span class="k">openbuilder</span> configure project perception-core
+<span class="k">openbuilder</span> clone sensor-abstraction vehicle-bridge</div>
+    </div>
+  </div>
+
+  <div id="qs3" class="tab-panel">
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-title">设置平台 + 构建</span></div>
+      <div class="code-body"><span class="k">openbuilder</span> download --platform linux-arm64   <span class="cm"># 下载 dockcross 镜像（首次）</span>
+<span class="k">openbuilder</span> configure platform linux-arm64     <span class="cm"># 设置 ARM64 编译</span>
+<span class="k">openbuilder</span> build -j 8 --build-type release    <span class="cm"># 交叉编译！</span></div>
+    </div>
+  </div>
+
+  <div id="qs4" class="tab-panel">
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-title">发布产物到 S3，随时可回溯</span></div>
+      <div class="code-body"><span class="k">openbuilder</span> publish upload --s3
+<span class="cm"># → Published to S3 as build 10042.</span>
+
+<span class="cm"># 任意时候回溯：</span>
+<span class="k">openbuilder</span> download --id 10042
+<span class="cm"># → Downloaded and extracted build 10042 to target/</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p style="font-size:18px;font-weight:700;color:white;margin-bottom:12px;">OpenBuilder</p>
+  <p>A CMake-oriented workspace and build tool, inspired by Zephyr west</p>
+  <p style="margin-top:12px;">
+    Python 3.9+ · Click CLI · CMake · Docker · S3
+  </p>
+  <p style="margin-top:16px;">
+    <a href="https://github.com/wenjunli312-code/openbuilder">GitHub</a>
+  </p>
+</footer>
+
+<script>
+function switchTab(btn, id) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+
+function switchCmd(btn, id) {
+  document.querySelectorAll('.cmd-chip').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.cmd-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+
+const observer = new IntersectionObserver(e => {
+  e.forEach(entry => {
+    if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
+  });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+document.querySelectorAll('nav .nav-links a').forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    const t = document.querySelector(link.getAttribute('href'));
+    if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+</script>
+</body>
+</html>

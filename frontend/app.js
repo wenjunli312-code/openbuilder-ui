@@ -354,6 +354,95 @@ function renderCompareResult(data, container) {
 // Init
 // ---------------------------------------------------------------------------
 
+// Handle copy_from parameter (copy build manifest to new build dialog)
+async function handleCopyFromParam() {
+    const params = new URLSearchParams(window.location.search);
+    const copyFromId = params.get('copy_from');
+    if (!copyFromId) return;
+
+
+    // Remove param from URL so refresh doesn't trigger copy again
+    params.delete('copy_from');
+    const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+    history.replaceState(null, '', newUrl);
+
+    // Fetch the source build
+    let build;
+    try {
+        const res = await fetch(`${API_BASE}/api/builds/${encodeURIComponent(copyFromId)}`);
+        if (!res.ok) throw new Error('Build not found');
+        build = await res.json();
+    } catch (err) {
+        alert('无法获取 build 信息: ' + err.message);
+        return;
+    }
+
+
+    const repos = build.repos || [];
+    if (repos.length === 0) {
+        alert('该 build 没有 repo 信息，无法复制');
+        return;
+    }
+
+    // Fetch project manifest template (has url/deps/description), override revision with build commit
+    let manifestText = '';
+    try {
+        const projRes = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(build.project)}/manifest`);
+        if (!projRes.ok) throw new Error('Project manifest not found');
+        const projData = await projRes.json();
+        const projManifest = jsyaml.load(projData.content);
+
+
+        // Build commit map: name -> commit from this build
+        const commitMap = {};
+        for (const r of repos) {
+            if (r.commit) commitMap[r.name] = r.commit;
+        }
+
+        // Patch each repo's revision with this build's commit
+        const projRepos = projManifest.repos || projManifest.projects || [];
+        for (const r of projRepos) {
+            if (commitMap[r.name]) r.revision = commitMap[r.name];
+        }
+
+        // Remove top-level description/name fields before dumping
+        const toSave = { repos: projRepos };
+        manifestText = jsyaml.dump(toSave, { defaultFlowType: false, lineWidth: 120 });
+    } catch (err) {
+        // Fallback: manual YAML from build repos only
+        manifestText = 'repos:\n';
+        for (const r of repos) {
+            if (!r.name || r.name === 'demo') continue;
+            manifestText += `  - name: ${r.name}\n    url: ${r.url || ''}\n    revision: ${r.commit || r.revision || ''}\n    branch: ${r.branch || ''}\n`;
+        }
+    }
+
+    // Set dialog fields: project from build, mode/platform/target as defaults, manifest pre-filled
+    const projectSelect = document.getElementById('dialog-project');
+    if (build.project && [...projectSelect.options].some(o => o.value === build.project)) {
+        projectSelect.value = build.project;
+    }
+
+    const modeMap = { release: 'release', debug: 'debug', releasewithdebuginfo: 'releasewithdebuginfo' };
+    const modeSelect = document.getElementById('dialog-mode');
+    const buildMode = build.mode || build.build_type || 'release';
+    if (modeMap[buildMode] && [...modeSelect.options].some(o => o.value === modeMap[buildMode])) {
+        modeSelect.value = modeMap[buildMode];
+    }
+
+    const platformSelect = document.getElementById('dialog-platform');
+    if (build.platform && [...platformSelect.options].some(o => o.value === build.platform)) {
+        platformSelect.value = build.platform;
+    }
+
+    document.getElementById('dialog-target').value = build.target || '';
+    document.getElementById('dialog-manifest').value = manifestText;
+
+    // Open dialog
+    document.getElementById('dialog-overlay').classList.add('active');
+}
+
 loadProjects();
 loadBuilds();
 setInterval(loadBuilds, POLL_INTERVAL);
+handleCopyFromParam();

@@ -30,6 +30,19 @@
             transition: background 0.2s;
         }
         .back-btn:hover { background: #d0e8ff; }
+        .btn-copy-build {
+            padding: 8px 18px;
+            background: #f0fff4;
+            color: #2e7d32;
+            border: 1.5px solid #a5d6a7;
+            border-radius: 8px;
+            font-size: 14px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-left: auto;
+        }
+        .btn-copy-build:hover { background: #e8f5e9; }
         .detail-page-header h1 {
             font-size: 22px;
             color: #1a5fa8;
@@ -267,6 +280,7 @@
         <div class="detail-page-header">
             <a href="index.html" class="back-btn">← 返回列表</a>
             <h1>Build Detail</h1>
+            <button id="btn-copy-build" class="btn-copy-build" onclick="copyBuild()">📋 复制编译</button>
         </div>
 
         <div class="info-cards" id="info-cards">
@@ -566,6 +580,12 @@
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;');
+        }
+
+        function copyBuild() {
+            const buildId = getBuildId();
+            if (!buildId) return;
+            window.location.href = `index.html?copy_from=${encodeURIComponent(buildId)}`;
         }
 
         loadBuild();
