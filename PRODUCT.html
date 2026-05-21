@@ -410,6 +410,7 @@
     <li><a href="#commands">命令</a></li>
     <li><a href="#frontend">前端</a></li>
  <li><a href="#cross-compile">交叉编译</a></li>
+    <li><a href="#agent">Agent</a></li>
     <li><a href="#quickstart">快速上手</a></li>
   </ul>
 </nav>
@@ -484,6 +485,9 @@
 <div style="padding-left:24px;"><span class="d">build/</span> <span class="c">← CMake out-of-tree 构建产物</span></div>
 <div style="padding-left:24px;"><span class="d">target/</span> <span class="c">← install_prefix，最终编译产物</span></div>
 <div style="padding-left:48px;"><span class="d">linux-arm64/</span> <span class="c">← 交叉编译按平台隔离</span></div>
+<div style="padding-left:72px;"><span class="d">third_party/</span> <span class="c">← 第三方库目录（S3 预编译的 .so/.a + .cmake）</span></div>
+<div style="padding-left:72px;"><span class="d">log/</span> <span class="c">← 执行过程中 log 目录（编译日志、错误追踪）</span></div>
+<div style="padding-left:72px;"><span class="d">config/</span> <span class="c">← 参数目录（运行时配置、启动参数）</span></div>
 <div style="padding-left:72px;"><span class="d">release/</span> <span class="c">← 编译类型隔离（debug / release / releasewithdebuginfo）</span></div>
 <div style="padding-left:96px;"><span class="f">lib/</span> <span class="c">← .so / .a 文件</span></div>
 <div style="padding-left:96px;"><span class="f">bin/</span> <span class="c">← 可执行文件</span></div>
@@ -730,6 +734,11 @@
   <h2 class="section-title">跨平台交叉编译</h2>
   <p class="section-desc">OpenBuilder 通过 Docker + dockcross 镜像实现零配置交叉编译。CMakeLists.txt 完全不需要改动，toolchain 在 cmake configure 时自动注入。</p>
 
+  <div class="card" style="margin-bottom:24px;">
+    <h3>🌍 多平台支持</h3>
+    <p style="margin-top:8px;">我们不仅支持 <strong>linux-arm64</strong>、<strong>linux-armv7</strong>、<strong>linux-x86_64</strong> 三种平台，理论上可以覆盖<strong>所有平台</strong>。只要平台提供对应的 Docker 镜像、交叉编译 toolchain 和 CMake toolchain 文件，就能在 OpenBuilder 中注册并一键构建，无需修改任何 CMakeLists.txt。</p>
+  </div>
+
   <div class="plat-grid">
     <div class="plat-card">
       <div class="plat-icon">🦄</div>
@@ -788,6 +797,61 @@
 <span class="s">  && cmake --install build/sensor-abstraction"</span></div>
   </div>
 </section>
+
+<!-- THIRD PARTY LIBS -->
+<section id="third-party">
+  <div class="section-tag">Third-Party Libraries</div>
+  <h2 class="section-title">第三方库集成设计</h2>
+  <p class="section-desc">每个交叉编译平台的第三方库各自独立编译、独立存储，确保不同架构的 .so 不互相覆盖。所有库在 dockcross 容器内编译，产物上传 S3，Build 时通过 <code>CMAKE_PREFIX_PATH</code> 自动注入 CMake 构建流程。</p>
+
+  <div class="card-grid" style="margin-bottom:24px;">
+    <div class="card">
+      <h3>📦 平台隔离</h3>
+      <p style="margin-top:8px;">每个平台在其专属 dockcross 容器内编译，安装到独立 prefix。<br><strong>禁止</strong>多平台共用同一 install prefix（后编译的会覆盖先编译的，导致架构错误）。</p>
+    </div>
+    <div class="card">
+      <h3>📋 CMake Config</h3>
+      <p style="margin-top:8px;">所有已完成编译的库通过 <code style="font-size:12px;background:rgba(59,130,246,0.1);padding:2px 6px;border-radius:4px;">CMAKE_PREFIX_PATH</code> 注入。<br>对于 autotools 项目（无 CMake config），手动提供 <code style="font-size:12px;background:rgba(59,130,246,0.1);padding:2px 6px;border-radius:4px;">PackageNameConfig.cmake</code> 实现 <code>find_package</code> 支持。</p>
+    </div>
+    <div class="card">
+      <h3>⛓️ 依赖链</h3>
+      <p style="margin-top:8px;">带依赖的库（如 curl 依赖 OpenSSL）通过 <code style="font-size:12px;background:rgba(59,130,246,0.1);padding:2px 6px;border-radius:4px;">PKG_CONFIG_PATH</code> 自动解决依赖链，无需手动指定链接参数。</p>
+    </div>
+    <div class="card">
+      <h3>💡 Header-only</h3>
+      <p style="margin-top:8px;">纯头文件库（如 JSON 解析库）只需下载单头文件 + 提供 CMake config，无需跨平台编译。同一份头文件可服务所有平台。</p>
+    </div>
+  </div>
+
+  <h3 style="font-size:18px;font-weight:700;color:white;margin-bottom:16px;">S3 存储结构</h3>
+  <div class="ws-tree" style="line-height:1.8;">
+<div><span class="d">openbuilder-builds/third_party/</span></div>
+<div style="padding-left:24px;"><span class="d">linux-x64/</span></div>
+<div style="padding-left:48px;"><span class="d">{lib_a}/</span> <span class="c">include/ + lib/ + cmake/ + version.txt</span></div>
+<div style="padding-left:48px;"><span class="d">{lib_b}/</span> <span class="c">include/ + lib/ + cmake/</span></div>
+<div style="padding-left:48px;"><span class="d">...</span></div>
+<div style="padding-left:24px;"><span class="d">linux-arm64/</span> <span class="c">← 同结构，每个 lib 为 ARM64 编译</span></div>
+<div style="padding-left:24px;"><span class="d">linux-armv7/</span> <span class="c">← 同结构，每个 lib 为 ARMv7 编译</span></div>
+  </div>
+
+  <h3 style="font-size:18px;font-weight:700;color:white;margin-bottom:16px;">Build 集成方式</h3>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-title">CMAKE_PREFIX_PATH + PKG_CONFIG_PATH</span>
+    </div>
+    <div class="code-body"><span class="k">cmake</span> -B /src/build/{name} -S /src/src/{name} <span class="k">\\</span>
+  -DCMAKE_INSTALL_PREFIX=/target <span class="k">\\</span>
+  -DCMAKE_PREFIX_PATH=<span class="s">"/target/third_party/{lib_a};\\</span>
+<span style="color:#a5d6ff;">                          /target/third_party/{lib_b};\\</span>
+<span style="color:#a5d6ff;">                          /target/third_party/{lib_c}"</span> <span class="k">\\</span>
+  -DCMAKE_BUILD_TYPE=release
+<span class="k">&&</span> <span style="color:#7ee787;">PKG_CONFIG_PATH=</span><span class="s">"/target/third_party/{lib_a}/lib/pkgconfig:\\</span>
+<span style="color:#a5d6ff;">                 /target/third_party/{lib_b}/lib/pkgconfig"</span> <span class="k">\\</span>
+  cmake --build /src/build/{name}</div>
+  </div>
+</section>
+
 <!-- FRONTEND -->
 <section id="frontend">
  <div class="section-tag">Frontend</div>
@@ -973,6 +1037,31 @@
  </div>
 </section>
 
+<!-- AGENT -->
+<section id="agent">
+  <div class="section-tag">AI Agent</div>
+  <h2 class="section-title">Agent 原生集成</h2>
+  <p class="section-desc">OpenBuilder 的前端页面和 CLI 后端都支持通过 AI Agent 直接调用。开发者只需用自然语言描述需求，Agent 即可自动解析意图并执行对应操作。</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>🗣️ 一句话发起构建</h3>
+      <p style="margin-top:8px;">对 Agent 说 <em>"给 perception-core 打一个 linux-arm64 release 包"</em>，Agent 自动调用 <code>openbuilder configure platform linux-arm64</code> + <code>openbuilder build</code>，无需手动敲命令。</p>
+    </div>
+    <div class="card">
+      <h3>📤 发布与回溯</h3>
+      <p style="margin-top:8px;"><em>"把刚才的构建产物发布到 S3"</em>、<em>"下载 build #42 的产物"</em>——Agent 直接调用 publish / download 命令，产物管理像聊天一样简单。</p>
+    </div>
+    <div class="card">
+      <h3>⚖️ 版本对比</h3>
+      <p style="margin-top:8px;"><em>"对比 build #41 和 #43 的差异"</em>，Agent 自动拉取两个版本的构建信息，高亮变化的 repo 和 commit，并生成对比报告。</p>
+    </div>
+    <div class="card">
+      <h3>🌐 前后端双通道</h3>
+      <p style="margin-top:8px;">无论是 Web 前端页面中的 Agent 输入框，还是 CLI 终端里的对话式交互，同一套能力全覆盖。前端 Agent 操作直观可视，后端 Agent 适合脚本和自动化集成。</p>
+    </div>
+  </div>
+</section>
 
 
 <!-- QUICKSTART -->

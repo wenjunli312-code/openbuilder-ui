@@ -13,6 +13,7 @@ services:
       - ./frontend:/frontend
       - ~/workspace/openbuilder-workspace:/Users/kaka/workspace/openbuilder-workspace
       - ~/workspace/code/openbuilder:/root/workspace/code/openbuilder
+      - ~/workspace/code/openbuilder_project_config:/Users/kaka/workspace/code/openbuilder_project_config
       - ./backend/builds.json:/app/builds.json
       # Docker socket to run dockcross containers from within backend
       - /var/run/docker.sock:/var/run/docker.sock

@@ -27,6 +27,44 @@ _S3_BUCKET = "openbuilder-builds"
 _S3_ACCESS_KEY = "minioadmin"
 _S3_SECRET_KEY = "minioadmin"
 
+_THIRD_PARTY_LIBS = ["libyaml", "openssl", "curl", "nlohmann_json"]
+
+
+def _download_third_party(platform: str, libs: list, dest_root: Path) -> None:
+    """Download third-party libraries from S3 into dest_root/third_party/{platform}/lib.
+
+    Downloads all files under S3 key `third_party/{platform}/{lib}/` for each lib.
+    """
+    import botocore.exceptions
+    client, bucket = _get_s3_client()
+    tp_dir = dest_root / "third_party" / platform
+
+    for lib in libs:
+        lib_dir = tp_dir / lib
+        s3_prefix = f"third_party/{platform}/{lib}/"
+        try:
+            response = client.list_objects_v2(Bucket=bucket, Prefix=s3_prefix)
+        except botocore.exceptions.ClientError as e:
+            if e.response["Error"]["Code"] == "NoSuchBucket":
+                raise RuntimeError(f"S3 bucket '{bucket}' does not exist")
+            raise
+
+        if "Contents" not in response:
+            # Empty prefix — check if it's a header-only lib
+            version_file = lib_dir / "version.txt"
+            version_file.parent.mkdir(parents=True, exist_ok=True)
+            version_file.write_text(f"{lib} (header-only or not found in S3)")
+            continue
+
+        for obj in response["Contents"]:
+            key = obj["Key"]
+            rel_path = key[len(s3_prefix):].lstrip("/")
+            if not rel_path:
+                continue
+            local_path = lib_dir / rel_path
+            local_path.parent.mkdir(parents=True, exist_ok=True)
+            client.download_file(bucket, key, str(local_path))
+
 
 def _get_s3_client():
     import boto3
@@ -180,6 +218,25 @@ def run_build(build_id: str, project: str, mode: str, platform: str, target: str
             env = os.environ.copy()
             env["PYTHONPATH"] = "/root/workspace/code/openbuilder/src"
 
+            # ── Step 1.5: Download third-party libs from S3 ───────────────────────
+            # Use manifest's third_party.platform if available; fallback to build platform
+            # Note: S3 uses "linux-x64" not "linux-x86_64"
+            # S3 uses "linux-x64" not "linux-x86_64" — map canonical platform to S3 key
+            _TP_PLATFORM_MAP = {
+                "linux-x86_64": "linux-x64",
+                "linux-arm64": "linux-arm64",
+                "linux-armv7": "linux-armv7",
+            }
+            s3_platform = _TP_PLATFORM_MAP.get(platform, platform)
+            tp_libs = manifest_data.get("third_party", {}).get("libs", [])
+            if tp_libs and s3_platform:
+                update_build(build_id, log=f"Downloading third-party libs ({s3_platform}): {', '.join(tp_libs)}...\n")
+                try:
+                    _download_third_party(s3_platform, tp_libs, WORKSPACE_DIR)
+                    update_build(build_id, log=f"Third-party libs ready at {WORKSPACE_DIR / 'third_party' / s3_platform}\n")
+                except Exception as e:
+                    update_build(build_id, log=f"Warning: third-party download failed: {e}\n  (continuing anyway...)\n")
+
             # Step 2: Clone repos
             update_build(build_id, log="Cloning repos...\n")
             # manifest_data already loaded above (repos converted to projects)
@@ -210,6 +267,18 @@ def run_build(build_id: str, project: str, mode: str, platform: str, target: str
                 import shutil
                 shutil.rmtree(target_dir)
                 update_build(build_id, log=f"Cleaned target directory ({platform}/{mode})\n")
+
+            # Step 2.7: Copy third_party into target/ so it gets packaged
+            if manifest_data.get("third_party", {}).get("libs"):
+                s3_platform = _TP_PLATFORM_MAP.get(platform, platform)
+                tp_src = WORKSPACE_DIR / "third_party" / s3_platform
+                tp_dest = WORKSPACE_DIR / "target" / platform / mode / "third_party"
+                if tp_src.exists() and any(tp_src.iterdir()):
+                    import shutil
+                    if tp_dest.exists():
+                        shutil.rmtree(tp_dest)
+                    shutil.copytree(tp_src, tp_dest)
+                    update_build(build_id, log=f"Copied third_party into target\n")
 
             # Step 3: Run openbuilder build
             if not target:

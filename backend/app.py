@@ -30,10 +30,15 @@ WORKSPACE_DIR = Path(os.environ.get("WORKSPACE_DIR", "/workspace/openbuilder-wor
 
 @app.route("/api/projects", methods=["GET"])
 def list_projects():
-    """Return all projects found in the config repo."""
-    projects_dir = WORKSPACE_DIR / ".openbuilder" / "projects"
+    """Return all projects from the local config repo."""
+    import os
+    CONFIG_REPO_DIR = Path(os.environ.get(
+        "OPENBUILDER_CONFIG_REPO_DIR",
+        "/Users/kaka/workspace/code/openbuilder_project_config"
+    ))
+    projects_dir = CONFIG_REPO_DIR / "projects"
     if not projects_dir.is_dir():
-        return jsonify({"projects": []})
+        return jsonify({"projects": [], "error": f"Config repo not found at {projects_dir}"}), 500
 
     projects = []
     for entry in sorted(projects_dir.iterdir()):
@@ -52,7 +57,6 @@ def list_projects():
                     "description": "",
                     "manifest_path": f"projects/{entry.name}/manifest.yaml",
                 })
-
     return jsonify({"projects": projects})
 
 
@@ -218,20 +222,15 @@ def get_workspace_manifest():
 
 @app.route("/api/projects/<project_name>/manifest", methods=["GET"])
 def get_project_manifest(project_name: str):
-    """Return the manifest template for a given project from the config repo.
-
-    The config repo is cloned into .openbuilder/ with projects under .openbuilder/projects/<name>/manifest.yaml.
-    """
-    # Config repo content (including projects/) lives directly in .openbuilder/
-    projects_dir = WORKSPACE_DIR / ".openbuilder" / "projects"
-    project_manifest_path = projects_dir / project_name / "manifest.yaml"
-
+    """Return the manifest template for a project from the local config repo."""
+    import os
+    CONFIG_REPO_DIR = Path(os.environ.get(
+        "OPENBUILDER_CONFIG_REPO_DIR",
+        "/Users/kaka/workspace/code/openbuilder_project_config"
+    ))
+    project_manifest_path = CONFIG_REPO_DIR / "projects" / project_name / "manifest.yaml"
     if not project_manifest_path.exists():
-        return jsonify({
-            "content": "",
-            "error": f"Project '{project_name}' not found (looked in {project_manifest_path})"
-        }), 404
-
+        return jsonify({"content": "", "error": f"Project '{project_name}' not found"}), 404
     try:
         content = project_manifest_path.read_text()
         return jsonify({"content": content})

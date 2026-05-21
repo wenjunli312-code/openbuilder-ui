@@ -233,3 +233,105 @@ target/linux-x86_64/debug/   ← 不打包
 - [ ] Workspace 7 天后清理的策略（下次 build 时检查并清理过期的，或独立 cron）
 - [ ] 用户在 UI 上是否需要看到"S3 命中缓存"的提示
 - [ ] 初始 workspace pool 大小（建议 5-10 个，根据并发预期调整）
+
+---
+
+## 编译镜像设计（2026-05-19）
+
+### 背景
+
+OpenBuilder 支持多平台交叉编译：在 x86_64 Mac 上编译出 ARM64 / ARMv7 的二进制。实现这一能力的关键是 **dockcross 系列编译镜像**。
+
+### 核心概念
+
+**交叉编译**：在一种 CPU 架构的机器上，编译出另一种架构的二进制。
+
+```
+Mac (x86_64) ──→ dockcross 镜像 ──→ ARM 二进制
+                  (x86_64 环境
+                   + ARM 工具链)
+```
+
+### 镜像架构说明
+
+所有 dockcross 镜像都是 **x86_64 Linux 镜像**（可以在 Mac 上直接运行），但各自内含不同架构的交叉编译工具链：
+
+| 镜像 | 运行架构 | 工具链输出架构 | 工具链位置 |
+|------|---------|--------------|-----------|
+| `dockcross/linux-x64` | x86_64 | x86_64 | `/usr/bin/`（本地 gcc）|
+| `dockcross/linux-arm64-full` | x86_64 | ARM64 (aarch64) | `/buildroot/bin/aarch64-buildroot-linux-gnu-*` |
+| `dockcross/linux-armv7` | x86_64 | ARMv7 | `/usr/xcc/armv7-unknown-linux-gnueabi/bin/` |
+
+### ARMv7 镜像特殊说明
+
+`dockcross/linux-armv7` 内置 Crosstool-NG 生成的交叉编译工具链：
+
+- **路径**：`/usr/xcc/armv7-unknown-linux-gnueabi/bin/`
+- **前缀**：`armv7-unknown-linux-gnueabi-`（gcc、ar、ranlib 等）
+- **环境变量**：`CROSS_COMPILE=armv7-unknown-linux-gnueabi-`（Configure 会自动使用）
+- **CROSS_ROOT**：`/usr/xcc/armv7-unknown-linux-gnueabi`
+
+编译 ARMv7 时配置示例：
+```bash
+export PATH=/usr/xcc/armv7-unknown-linux-gnueabi/bin:$PATH
+CROSS_COMPILE=/usr/xcc/armv7-unknown-linux-gnueabi/bin/
+CC=armv7-unknown-linux-gnueabi-gcc
+AR=armv7-unknown-linux-gnueabi-ar
+RANLIB=armv7-unknown-linux-gnueabi-ranlib
+./Configure linux-armv4 --prefix=/path/to/install
+```
+
+### CMake 交叉编译配置
+
+CMake 不依赖 `CROSS_COMPILE` 环境变量，需要通过 `-D` 参数显式传入：
+
+```bash
+export PATH=/usr/xcc/armv7-unknown-linux-gnueabi/bin:$PATH
+CC=armv7-unknown-linux-gnueabi-gcc \
+cmake <source> \
+  -DCMAKE_INSTALL_PREFIX=<install_path> \
+  -DCMAKE_C_COMPILER=armv7-unknown-linux-gnueabi-gcc \
+  -DCMAKE_AR=armv7-unknown-linux-gnueabi-ar \
+  -DCMAKE_RANLIB=armv7-unknown-linux-gnueabi-ranlib
+```
+
+### 第三方库编译
+
+各平台的第三方库（libyaml、openssl、curl、nlohmann_json）通过 S3 存储，存放结构：
+
+```
+openbuilder-builds/third_party/
+├── linux-x64/
+│   ├── libyaml/       (lib/, include/, version.txt)
+│   ├── openssl/       (lib/, include/, cmake/, version.txt)
+│   ├── curl/          (lib/, include/, cmake/, version.txt)
+│   └── nlohmann_json/ (include/, cmake/)
+├── linux-arm64/
+│   └── ...
+└── linux-armv7/
+    └── ...
+```
+
+编译第三方库时通过 `CMAKE_PREFIX_PATH` 关联已编译好的依赖（见下表），避免重复编译：
+
+| 平台 | libyaml | openssl | curl | nlohmann_json |
+|------|:-------:|:-------:|:----:|:-------------:|
+| linux-x64 | ✅ | ✅ | ✅ | ✅ (header-only) |
+| linux-arm64 | ✅ | ✅ | ✅ | ✅ (header-only) |
+| linux-armv7 | ✅ | ✅ | ✅ | ✅ (header-only) |
+
+### 新增编译镜像的检查清单
+
+新增平台（如 linux-riscv64）时，需要确认：
+
+1. **工具链路径**：`/buildroot/bin/` 还是 `/usr/xcc/<triple>/bin/`
+2. **工具链前缀**：确认 `*-gcc`、`*-ar`、`*-ranlib` 的三重前缀格式
+3. **Configure target name**：参考 `linux-aarch64`、`linux-armv4` 等已知 target
+4. **CMAKE_C_COMPILER**：CMake 需要显式指定，Configure 通过 `CROSS_COMPILE` 自动处理
+
+### 编译容器 vs 运行容器
+
+- **编译容器**（dockcross 镜像）：临时容器，`docker run --rm`，编译完成后即销毁
+- **运行容器**：目标 binary 的运行环境，由用户另行部署
+
+编译产物为静态链接的 ELF 二进制，不依赖容器内的动态库。
